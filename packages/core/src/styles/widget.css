@@ -1,0 +1,893 @@
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600;700&display=swap');
+
+/* ─── Design Tokens (Dark Default) ───────────────────────────── */
+:host,
+:host([data-theme="dark"]),
+[data-theme="dark"],
+:root {
+  --rdx-bg:               #000000;
+  --rdx-dot:              rgba(255, 255, 255, 0.08);
+  --rdx-surface:          #09090b;
+  --rdx-surface-card:     #121214;
+  --rdx-border:           #27272a;
+  --rdx-border-hover:     #ffffff;
+  --rdx-text:             #ffffff;
+  --rdx-text-muted:       #888888;
+  --rdx-text-subtle:      #52525b;
+  --rdx-btn-active-bg:    #ffffff;
+  --rdx-btn-active-text:  #000000;
+  --rdx-btn-hover-bg:     #141418;
+  --rdx-device-bezel:     #27272a;
+  --rdx-mac-header:       #0e0e11;
+  --rdx-beam-color:       rgba(255, 255, 255, 0.8);
+  --rdx-font:             'Geist', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --rdx-font-mono:        'Geist Mono', 'SF Mono', Menlo, Monaco, Consolas, monospace;
+  --rdx-radius:           0px;
+  --rdx-transition:       140ms cubic-bezier(0.16, 1, 0.3, 1);
+  all: initial;
+  display: block;
+}
+
+/* ─── Design Tokens (Auto Light Mode) ────────────────────────── */
+:host([data-theme="light"]),
+[data-theme="light"] {
+  --rdx-bg:               #f8f8fa;
+  --rdx-dot:              rgba(0, 0, 0, 0.07);
+  --rdx-surface:          #ffffff;
+  --rdx-surface-card:     #f4f4f5;
+  --rdx-border:           #e4e4e7;
+  --rdx-border-hover:     #09090b;
+  --rdx-text:             #09090b;
+  --rdx-text-muted:       #71717a;
+  --rdx-text-subtle:      #a1a1aa;
+  --rdx-btn-active-bg:    #09090b;
+  --rdx-btn-active-text:  #ffffff;
+  --rdx-btn-hover-bg:     #f4f4f5;
+  --rdx-device-bezel:     #e4e4e7;
+  --rdx-mac-header:       #f4f4f5;
+  --rdx-beam-color:       rgba(0, 0, 0, 0.8);
+}
+
+/* ─── Reset (shadow DOM scoped) ─────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ─── FAB (Floating Action Button - Icon Only) ─────────────── */
+.rdx-fab {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  background: var(--rdx-surface, #09090b);
+  border: 1px solid var(--rdx-border, #27272a);
+  color: var(--rdx-text, #ffffff);
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--rdx-border, #27272a);
+  transition: all var(--rdx-transition);
+  z-index: 999999;
+  pointer-events: auto !important;
+  user-select: none;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.rdx-fab:hover {
+  background: var(--rdx-btn-hover-bg, #141418);
+  border-color: var(--rdx-border-hover, #ffffff);
+  color: var(--rdx-text, #ffffff);
+  transform: translateY(-2px);
+  box-shadow: 0 0 20px var(--rdx-dot, rgba(255, 255, 255, 0.2)), 0 10px 30px rgba(0, 0, 0, 0.6);
+}
+
+.rdx-fab:active {
+  transform: translateY(0);
+}
+
+/* ─── Panel & Workbench Canvas ───────────────────────────────── */
+.rdx-panel {
+  position: fixed;
+  inset: 0;
+  background-color: var(--rdx-bg);
+  background-image: radial-gradient(var(--rdx-dot) 1px, transparent 1px);
+  background-size: 24px 24px;
+  display: flex;
+  flex-direction: column;
+  z-index: 999998;
+  pointer-events: auto;
+  overflow: hidden;
+  animation: rdx-fade-in 200ms ease forwards;
+}
+
+@keyframes rdx-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ─── Floating Command Dock (Farm.js Segmented Toolbar) ──────── */
+.rdx-dock {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 6px 4px 12px;
+  border-radius: 0px;
+  background: var(--rdx-surface);
+  border: 1px solid var(--rdx-border);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 0 1px var(--rdx-border);
+  pointer-events: auto;
+  user-select: none;
+  overflow: hidden;
+  animation: rdx-dock-enter 280ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes rdx-dock-enter {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -16px) scale(0.97);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+}
+
+/* Minimal Animated Edge Beam across Top Container Edge (Runs once) */
+.rdx-dock__edge-beam {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.rdx-dock__edge-beam::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--rdx-dot) 25%,
+    var(--rdx-beam-color) 50%,
+    var(--rdx-dot) 75%,
+    transparent 100%
+  );
+  animation: rdx-beam-sweep 1.4s cubic-bezier(0.16, 1, 0.3, 1) 80ms 1 forwards;
+}
+
+@keyframes rdx-beam-sweep {
+  0% {
+    transform: translateX(-120%);
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(250%);
+    opacity: 0;
+  }
+}
+
+/* Brand Section */
+.rdx-dock__brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-right: 12px;
+  border-right: 1px solid var(--rdx-border);
+}
+
+.rdx-dock__logo-icon {
+  color: var(--rdx-text);
+  flex-shrink: 0;
+}
+
+.rdx-dock__logo {
+  font-family: var(--rdx-font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--rdx-text);
+  letter-spacing: 0.08em;
+}
+
+.rdx-dock__badge {
+  color: var(--rdx-text-subtle);
+  font-weight: 400;
+}
+
+/* Segmented Presets Switcher */
+.rdx-dock__presets {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--rdx-border);
+  background: var(--rdx-surface);
+  border-radius: 0px;
+  overflow: hidden;
+}
+
+.rdx-dock-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 14px;
+  background: var(--rdx-surface);
+  border: none;
+  border-right: 1px solid var(--rdx-border);
+  color: var(--rdx-text-muted);
+  font-family: var(--rdx-font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: all var(--rdx-transition);
+  white-space: nowrap;
+}
+
+.rdx-dock-btn:last-child {
+  border-right: none;
+}
+
+.rdx-dock-btn .rdx-dock-btn__icon {
+  color: var(--rdx-text-muted);
+  transition: color var(--rdx-transition);
+}
+
+/* Inactive Button Hover State */
+.rdx-dock-btn:not(.rdx-dock-btn--active):hover {
+  background: var(--rdx-btn-hover-bg);
+  color: var(--rdx-text);
+}
+
+.rdx-dock-btn:not(.rdx-dock-btn--active):hover .rdx-dock-btn__icon {
+  color: var(--rdx-text);
+}
+
+/* Active Button State */
+.rdx-dock-btn--active {
+  color: var(--rdx-btn-active-text) !important;
+  background: var(--rdx-btn-active-bg) !important;
+  font-weight: 700;
+}
+
+.rdx-dock-btn--active .rdx-dock-btn__icon {
+  color: var(--rdx-btn-active-text) !important;
+}
+
+.rdx-dock-btn--active:hover {
+  opacity: 0.95;
+}
+
+/* Reset Multi-View Button in Dock */
+.rdx-dock-reset-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--rdx-surface);
+  border: 1px solid var(--rdx-border);
+  color: var(--rdx-text-muted);
+  font-family: var(--rdx-font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  border-radius: 0px;
+  cursor: pointer;
+  transition: all var(--rdx-transition);
+  animation: rdx-fade-in 180ms ease forwards;
+}
+
+.rdx-dock-reset-btn:hover {
+  color: var(--rdx-text);
+  background: var(--rdx-btn-hover-bg);
+  border-color: var(--rdx-border-hover);
+}
+
+/* Actions: Tour & Close */
+.rdx-dock__actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-left: 4px;
+}
+
+.rdx-dock-help-btn,
+.rdx-dock-close-btn {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0px;
+  background: var(--rdx-surface);
+  border: 1px solid var(--rdx-border);
+  color: var(--rdx-text-muted);
+  cursor: pointer;
+  transition: all var(--rdx-transition);
+}
+
+.rdx-dock-help-btn:hover,
+.rdx-dock-close-btn:hover {
+  color: var(--rdx-text);
+  background: var(--rdx-btn-hover-bg);
+  border-color: var(--rdx-border-hover);
+  transform: scale(1.05);
+}
+
+.rdx-dock-help-btn:active,
+.rdx-dock-close-btn:active {
+  transform: scale(0.95);
+}
+
+/* ─── Workbench Canvas ───────────────────────────────────────── */
+.rdx-workbench {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  overflow-x: auto;
+  overflow-y: auto;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 85px 48px 60px;
+  box-sizing: border-box;
+  transition: background-color var(--rdx-transition);
+}
+
+.rdx-workbench--focused {
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.rdx-workbench::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+.rdx-workbench::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.rdx-workbench::-webkit-scrollbar-thumb {
+  background: var(--rdx-border);
+  border-radius: 0px;
+}
+
+.rdx-workbench::-webkit-scrollbar-thumb:hover {
+  background: var(--rdx-text-subtle);
+}
+
+/* ─── Stage (Multi-View vs Centered Focus) ─────────────────────── */
+.rdx-stage {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 40px;
+  min-width: min-content;
+  transition: all 400ms cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+
+.rdx-stage--focused {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: calc(100vh - 120px);
+  gap: 0px;
+}
+
+/* ─── Frame Slots ─────────────────────────────────────────────── */
+.rdx-frame-slot {
+  transition: all 400ms cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+
+/* When focused: Takes the True Center of the Screen */
+.rdx-stage--focused .rdx-frame-slot--focused {
+  position: relative;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transform: none;
+  animation: rdx-focus-enter 350ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes rdx-focus-enter {
+  0% {
+    transform: scale(0.92);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* When blurred: Collapses out of flex layout flow & dissolves into background */
+.rdx-stage--focused .rdx-frame-slot--blurred {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.7);
+  filter: blur(20px) grayscale(70%);
+  opacity: 0.05;
+  pointer-events: none;
+  z-index: 5;
+  transition: all 400ms cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+
+/* ─── Viewport Frame Wrapper ──────────────────────────────────── */
+.rdx-frame-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex-shrink: 0;
+  transition: all 350ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Minimal 1-line Header directly above frame */
+.rdx-frame-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2px;
+  margin-bottom: 8px;
+  font-family: var(--rdx-font-mono);
+  font-size: 11px;
+  color: var(--rdx-text-muted);
+  box-sizing: border-box;
+  user-select: none;
+}
+
+.rdx-frame-header__left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rdx-frame-header__icon {
+  color: var(--rdx-text-muted);
+}
+
+.rdx-frame-header__name {
+  font-weight: 600;
+  color: var(--rdx-text);
+  letter-spacing: 0.04em;
+}
+
+.rdx-frame-header__dim {
+  font-size: 10px;
+  color: var(--rdx-text-subtle);
+}
+
+.rdx-frame-header__right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Focus / Zoom Button on each frame */
+.rdx-frame-zoom-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  background: var(--rdx-surface-card);
+  border: 1px solid var(--rdx-border-hover);
+  color: var(--rdx-text);
+  font-family: var(--rdx-font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  border-radius: 0px;
+  cursor: pointer;
+  opacity: 1;
+  transition: all var(--rdx-transition);
+}
+
+.rdx-frame-zoom-btn:hover {
+  color: var(--rdx-surface);
+  background: var(--rdx-text);
+  border-color: var(--rdx-text);
+}
+
+.rdx-frame-zoom-btn--active {
+  background: var(--rdx-btn-active-bg);
+  color: var(--rdx-btn-active-text);
+  border-color: var(--rdx-btn-active-bg);
+  font-weight: 700;
+}
+
+/* ─── Hardware Device Frames ──────────────────────────────────── */
+.rdx-device {
+  background: var(--rdx-surface);
+  position: relative;
+  overflow: hidden;
+  box-sizing: content-box;
+  transition: box-shadow 350ms cubic-bezier(0.16, 1, 0.3, 1), border-color 350ms ease;
+}
+
+.rdx-device--focused {
+  box-shadow: 0 35px 100px rgba(0, 0, 0, 0.85), 0 0 0 2px var(--rdx-border-hover) !important;
+}
+
+/* Mobile Frame */
+.rdx-device--mobile {
+  border: 8px solid var(--rdx-device-bezel);
+  border-radius: 32px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--rdx-border);
+}
+
+/* Mobile Camera Notch */
+.rdx-notch {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--rdx-device-bezel);
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+  z-index: 20;
+  pointer-events: none;
+}
+
+/* Tablet Frame */
+.rdx-device--tablet {
+  border: 8px solid var(--rdx-device-bezel);
+  border-radius: 20px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--rdx-border);
+}
+
+/* Desktop Frame */
+.rdx-device--desktop {
+  border: 1px solid var(--rdx-border);
+  border-radius: 4px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--rdx-border);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Mac-style Window Header */
+.rdx-mac-header {
+  width: 100%;
+  background: var(--rdx-mac-header);
+  border-bottom: 1px solid var(--rdx-border);
+  display: flex;
+  align-items: center;
+  position: relative;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.rdx-mac-dots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rdx-mac-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--rdx-text-subtle);
+}
+
+.rdx-mac-dot--close { background: #ef4444; opacity: 0.7; }
+.rdx-mac-dot--min   { background: #eab308; opacity: 0.7; }
+.rdx-mac-dot--max   { background: #22c55e; opacity: 0.7; }
+
+.rdx-mac-url {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 10px;
+  background: var(--rdx-surface);
+  border: 1px solid var(--rdx-border);
+  border-radius: 0px;
+  font-family: var(--rdx-font-mono);
+  font-size: 10px;
+  color: var(--rdx-text-muted);
+}
+
+.rdx-mac-url__icon {
+  color: var(--rdx-text-subtle);
+}
+
+/* Iframe Viewport Container */
+.rdx-iframe-viewport {
+  overflow: hidden;
+  background: var(--rdx-surface);
+  position: relative;
+  flex-shrink: 0;
+}
+
+.rdx-iframe-viewport iframe {
+  display: block;
+  border: none;
+  background: var(--rdx-surface);
+}
+
+/* ─── Empty State ────────────────────────────────────────────── */
+.rdx-empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 400px;
+}
+
+.rdx-empty__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 32px 48px;
+  border-radius: 0px;
+  background: var(--rdx-surface);
+  border: 1px solid var(--rdx-border);
+  text-align: center;
+}
+
+.rdx-empty__icon {
+  font-size: 24px;
+  color: var(--rdx-text-subtle);
+}
+
+.rdx-empty__text {
+  font-family: var(--rdx-font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--rdx-text);
+  letter-spacing: 0.05em;
+}
+
+.rdx-empty__sub {
+  font-family: var(--rdx-font-mono);
+  font-size: 11px;
+  color: var(--rdx-text-subtle);
+}
+
+/* ─── Onboarding Interactive Spotlight Tour ─────────────────── */
+.rdx-tour-container {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  pointer-events: auto;
+}
+
+.rdx-tour-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  animation: rdxTourFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes rdxTourFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Elevated Target Element above backdrop */
+.rdx-tour-highlighted {
+  position: relative !important;
+  z-index: 100001 !important;
+  outline: 2px solid var(--rdx-text) !important;
+  outline-offset: 3px !important;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.3), 0 0 24px rgba(0, 0, 0, 0.8) !important;
+  opacity: 1 !important;
+  pointer-events: none !important;
+  animation: rdxHighlightPulse 2s infinite ease-in-out;
+}
+
+@keyframes rdxHighlightPulse {
+  0%, 100% {
+    outline-color: var(--rdx-text);
+  }
+  50% {
+    outline-color: var(--rdx-border-hover);
+  }
+}
+
+/* Anchored Floating Tooltip Card */
+.rdx-tour-tooltip {
+  z-index: 100002;
+  background: var(--rdx-surface-card);
+  border: 1px solid var(--rdx-border-hover);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6), 0 0 0 1px var(--rdx-border);
+  border-radius: 0px;
+  display: flex;
+  flex-direction: column;
+  overflow: visible;
+  transition: top 0.25s cubic-bezier(0.16, 1, 0.3, 1), left 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: rdxTourSlideUp 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes rdxTourSlideUp {
+  from {
+    transform: translateY(8px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Pointer Arrow */
+.rdx-tour-arrow {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: var(--rdx-surface-card);
+  border: 1px solid var(--rdx-border-hover);
+  transform: rotate(45deg);
+  pointer-events: none;
+  z-index: 10;
+}
+
+.rdx-tour-arrow--top {
+  top: -6px;
+  border-bottom: none;
+  border-right: none;
+}
+
+.rdx-tour-arrow--bottom {
+  bottom: -6px;
+  border-top: none;
+  border-left: none;
+}
+
+.rdx-tour-tooltip__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--rdx-border);
+  background: var(--rdx-surface);
+}
+
+.rdx-tour-tooltip__badge {
+  font-family: var(--rdx-font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--rdx-text-muted);
+  letter-spacing: 0.1em;
+}
+
+.rdx-tour-tooltip__close {
+  background: transparent;
+  border: none;
+  color: var(--rdx-text-muted);
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--rdx-transition);
+}
+
+.rdx-tour-tooltip__close:hover {
+  color: var(--rdx-text);
+}
+
+.rdx-tour-tooltip__body {
+  padding: 16px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rdx-tour-tooltip__title {
+  margin: 0;
+  font-family: var(--rdx-font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--rdx-text);
+  letter-spacing: 0.02em;
+}
+
+.rdx-tour-tooltip__desc {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--rdx-text-muted);
+}
+
+.rdx-tour-tooltip__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-top: 1px solid var(--rdx-border);
+  background: var(--rdx-surface);
+}
+
+.rdx-tour-tooltip__nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rdx-tour-tooltip__btn {
+  font-family: var(--rdx-font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 5px 10px;
+  border-radius: 0px;
+  cursor: pointer;
+  transition: all var(--rdx-transition);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.rdx-tour-tooltip__btn--ghost {
+  background: transparent;
+  border: none;
+  color: var(--rdx-text-muted);
+  padding: 5px 6px;
+}
+
+.rdx-tour-tooltip__btn--ghost:hover {
+  color: var(--rdx-text);
+}
+
+.rdx-tour-tooltip__btn--sec {
+  background: var(--rdx-surface);
+  border: 1px solid var(--rdx-border);
+  color: var(--rdx-text);
+}
+
+.rdx-tour-tooltip__btn--sec:hover {
+  background: var(--rdx-btn-hover-bg);
+  border-color: var(--rdx-border-hover);
+}
+
+.rdx-tour-tooltip__btn--pri {
+  background: var(--rdx-text);
+  color: var(--rdx-surface);
+  border: 1px solid var(--rdx-text);
+}
+
+.rdx-tour-tooltip__btn--pri:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.rdx-tour-tooltip__btn--pri:active {
+  transform: translateY(0);
+}
