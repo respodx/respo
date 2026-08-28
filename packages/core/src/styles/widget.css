@@ -674,220 +674,274 @@
   color: var(--rdx-text-subtle);
 }
 
-/* ─── Onboarding Interactive Spotlight Tour ─────────────────── */
-.rdx-tour-container {
+/* ─── Guide / Help Modal ─────────────────────────────────────── */
+.rdx-modal-container {
   position: fixed;
   inset: 0;
   z-index: 100000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
   pointer-events: auto;
+  box-sizing: border-box;
 }
 
-.rdx-tour-backdrop {
+.rdx-modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.55);
-  animation: rdxTourFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  animation: rdxModalFadeIn 180ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-@keyframes rdxTourFadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+@keyframes rdxModalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-/* Elevated Target Element above backdrop */
-.rdx-tour-highlighted {
-  position: relative !important;
-  z-index: 100001 !important;
-  outline: 2px solid var(--rdx-text) !important;
-  outline-offset: 3px !important;
-  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.3), 0 0 24px rgba(0, 0, 0, 0.8) !important;
-  opacity: 1 !important;
-  pointer-events: none !important;
-  animation: rdxHighlightPulse 2s infinite ease-in-out;
-}
-
-@keyframes rdxHighlightPulse {
-  0%, 100% {
-    outline-color: var(--rdx-text);
-  }
-  50% {
-    outline-color: var(--rdx-border-hover);
-  }
-}
-
-/* Anchored Floating Tooltip Card */
-.rdx-tour-tooltip {
-  z-index: 100002;
+.rdx-modal-card {
+  position: relative;
+  z-index: 100001;
+  width: 100%;
+  max-width: 580px;
   background: var(--rdx-surface-card);
-  border: 1px solid var(--rdx-border-hover);
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6), 0 0 0 1px var(--rdx-border);
+  border: 1px solid var(--rdx-border);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7), 0 0 0 1px var(--rdx-border);
   border-radius: 0px;
   display: flex;
   flex-direction: column;
-  overflow: visible;
-  transition: top 0.25s cubic-bezier(0.16, 1, 0.3, 1), left 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  animation: rdxTourSlideUp 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  overflow: hidden;
+  animation: rdxModalPop 200ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-@keyframes rdxTourSlideUp {
+@keyframes rdxModalPop {
   from {
-    transform: translateY(8px);
+    transform: scale(0.96) translateY(8px);
     opacity: 0;
   }
   to {
-    transform: translateY(0);
+    transform: scale(1) translateY(0);
     opacity: 1;
   }
 }
 
-/* Pointer Arrow */
-.rdx-tour-arrow {
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  background: var(--rdx-surface-card);
-  border: 1px solid var(--rdx-border-hover);
-  transform: rotate(45deg);
-  pointer-events: none;
-  z-index: 10;
-}
-
-.rdx-tour-arrow--top {
-  top: -6px;
-  border-bottom: none;
-  border-right: none;
-}
-
-.rdx-tour-arrow--bottom {
-  bottom: -6px;
-  border-top: none;
-  border-left: none;
-}
-
-.rdx-tour-tooltip__header {
+.rdx-modal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 14px;
-  border-bottom: 1px solid var(--rdx-border);
+  padding: 14px 18px;
   background: var(--rdx-surface);
+  border-bottom: 1px solid var(--rdx-border);
 }
 
-.rdx-tour-tooltip__badge {
+.rdx-modal-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rdx-modal-logo-icon {
+  color: var(--rdx-text);
+}
+
+.rdx-modal-title {
+  font-family: var(--rdx-font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--rdx-text);
+}
+
+.rdx-modal-badge {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--rdx-text-muted);
+  letter-spacing: 0.06em;
+  margin-left: 2px;
+}
+
+.rdx-modal-version {
   font-family: var(--rdx-font-mono);
   font-size: 10px;
   font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 0px;
+  background: var(--rdx-btn-hover-bg);
+  border: 1px solid var(--rdx-border);
   color: var(--rdx-text-muted);
-  letter-spacing: 0.1em;
 }
 
-.rdx-tour-tooltip__close {
+.rdx-modal-close {
   background: transparent;
   border: none;
   color: var(--rdx-text-muted);
   cursor: pointer;
-  padding: 2px;
+  padding: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: color var(--rdx-transition);
 }
 
-.rdx-tour-tooltip__close:hover {
+.rdx-modal-close:hover {
   color: var(--rdx-text);
 }
 
-.rdx-tour-tooltip__body {
-  padding: 16px 14px 14px;
+.rdx-modal-body {
+  padding: 18px;
   display: flex;
   flex-direction: column;
+  gap: 16px;
+}
+
+.rdx-guide-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 540px) {
+  .rdx-guide-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.rdx-guide-card {
+  padding: 12px 14px;
+  background: var(--rdx-surface);
+  border: 1px solid var(--rdx-border);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rdx-guide-card__header {
+  display: flex;
+  align-items: center;
   gap: 8px;
 }
 
-.rdx-tour-tooltip__title {
-  margin: 0;
-  font-family: var(--rdx-font-mono);
-  font-size: 13px;
-  font-weight: 700;
+.rdx-guide-card__icon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
   color: var(--rdx-text);
-  letter-spacing: 0.02em;
 }
 
-.rdx-tour-tooltip__desc {
+.rdx-guide-card__title {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 12px;
+  font-family: var(--rdx-font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--rdx-text);
+  text-transform: uppercase;
+}
+
+.rdx-guide-card__desc {
+  margin: 0;
+  font-family: var(--rdx-font);
+  font-size: 11px;
   line-height: 1.45;
   color: var(--rdx-text-muted);
 }
 
-.rdx-tour-tooltip__footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 14px;
-  border-top: 1px solid var(--rdx-border);
-  background: var(--rdx-surface);
+.rdx-guide-card__desc strong {
+  color: var(--rdx-text);
+  font-weight: 600;
 }
 
-.rdx-tour-tooltip__nav {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.rdx-tour-tooltip__btn {
+.rdx-guide-card__desc code {
   font-family: var(--rdx-font-mono);
   font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  padding: 5px 10px;
-  border-radius: 0px;
-  cursor: pointer;
-  transition: all var(--rdx-transition);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  white-space: nowrap;
-}
-
-.rdx-tour-tooltip__btn--ghost {
-  background: transparent;
-  border: none;
-  color: var(--rdx-text-muted);
-  padding: 5px 6px;
-}
-
-.rdx-tour-tooltip__btn--ghost:hover {
-  color: var(--rdx-text);
-}
-
-.rdx-tour-tooltip__btn--sec {
-  background: var(--rdx-surface);
+  padding: 1px 4px;
+  background: var(--rdx-btn-hover-bg);
   border: 1px solid var(--rdx-border);
   color: var(--rdx-text);
 }
 
-.rdx-tour-tooltip__btn--sec:hover {
-  background: var(--rdx-btn-hover-bg);
-  border-color: var(--rdx-border-hover);
+.rdx-shortcuts-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--rdx-surface);
+  border: 1px solid var(--rdx-border);
+  font-family: var(--rdx-font-mono);
+  font-size: 10px;
+  gap: 12px;
 }
 
-.rdx-tour-tooltip__btn--pri {
+.rdx-shortcuts-bar__label {
+  color: var(--rdx-text-muted);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.rdx-shortcuts-list {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.rdx-shortcut-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--rdx-text-muted);
+}
+
+.rdx-shortcut-item kbd {
+  font-family: var(--rdx-font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 6px;
+  background: var(--rdx-surface-card);
+  border: 1px solid var(--rdx-border-hover);
+  color: var(--rdx-text);
+}
+
+.rdx-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  background: var(--rdx-surface);
+  border-top: 1px solid var(--rdx-border);
+}
+
+.rdx-modal-footer__sub {
+  font-family: var(--rdx-font-mono);
+  font-size: 10px;
+  color: var(--rdx-text-subtle);
+  letter-spacing: 0.02em;
+}
+
+.rdx-modal-btn {
+  font-family: var(--rdx-font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 6px 16px;
+  border-radius: 0px;
+  cursor: pointer;
+  transition: all var(--rdx-transition);
+}
+
+.rdx-modal-btn--primary {
   background: var(--rdx-text);
   color: var(--rdx-surface);
   border: 1px solid var(--rdx-text);
 }
 
-.rdx-tour-tooltip__btn--pri:hover {
+.rdx-modal-btn--primary:hover {
   opacity: 0.9;
   transform: translateY(-1px);
-}
-
-.rdx-tour-tooltip__btn--pri:active {
-  transform: translateY(0);
 }

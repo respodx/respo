@@ -90,10 +90,15 @@ function DevWidgetInner({ src: srcProp, defaultViewports = DEFAULT_ACTIVE_VIEWPO
     setShowTour(true);
   };
 
-  // Handle Escape key: first exits tour, then focus mode, then closes panel
+  // Handle Escape and ? keys
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape' && isOpen) {
+      if (!isOpen) return;
+
+      const targetTag = (e.target as HTMLElement)?.tagName;
+      const isTyping = targetTag === 'INPUT' || targetTag === 'TEXTAREA' || targetTag === 'SELECT';
+
+      if (e.key === 'Escape') {
         if (showTour) {
           handleCloseTour();
         } else if (focusedId) {
@@ -101,6 +106,8 @@ function DevWidgetInner({ src: srcProp, defaultViewports = DEFAULT_ACTIVE_VIEWPO
         } else {
           setIsOpen(false);
         }
+      } else if (e.key === '?' && !isTyping) {
+        setShowTour((prev) => !prev);
       }
     }
     window.addEventListener('keydown', handleKeyDown);
