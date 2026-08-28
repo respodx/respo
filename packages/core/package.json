@@ -1,6 +1,6 @@
 {
   "name": "responsive-dx",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Zero-config in-browser responsive workbench suite for localhost with live DOM event mirroring.",
   "keywords": [
     "responsive",
