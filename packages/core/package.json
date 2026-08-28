@@ -1,6 +1,6 @@
 {
   "name": "responsive-dx",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Zero-config in-browser responsive workbench suite for localhost with live DOM event mirroring.",
   "keywords": [
     "responsive",
@@ -26,8 +26,8 @@
     }
   },
   "bin": {
-    "responsive-dx": "./dist/cli.js",
-    "respo": "./dist/cli.js"
+    "responsive-dx": "dist/cli.js",
+    "respo": "dist/cli.js"
   },
   "files": [
     "dist",
