@@ -51,7 +51,7 @@ export function OnboardingTour({ onClose }: OnboardingTourProps) {
             <div className="rdx-guide-card">
               <div className="rdx-guide-card__header">
                 <div className="rdx-guide-card__icon">
-                  <DeviceIcon device="mobile" size={14} />
+                  <DeviceIcon device="mobile" />
                 </div>
                 <h4 className="rdx-guide-card__title">Multi-Viewport Matrix</h4>
               </div>
@@ -77,7 +77,7 @@ export function OnboardingTour({ onClose }: OnboardingTourProps) {
             <div className="rdx-guide-card">
               <div className="rdx-guide-card__header">
                 <div className="rdx-guide-card__icon">
-                  <ZoomOutIcon size={14} />
+                  <ZoomOutIcon />
                 </div>
                 <h4 className="rdx-guide-card__title">Single-View Focus</h4>
               </div>
