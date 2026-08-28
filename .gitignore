@@ -4,6 +4,7 @@ node_modules/
 
 # Build & Compilation Outputs
 dist/
+bin/
 build/
 out/
 .next/

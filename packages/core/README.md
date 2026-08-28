@@ -55,7 +55,23 @@ Every web developer uses Chrome DevTools, but testing responsive UX has remained
 
 ---
 
-## 📦 Installation
+## 🚀 Quick Start
+
+### ⚡ Option A: 1-Command Automated Setup (Recommended)
+
+Run inside any React, Next.js, Vite, Remix, or Astro project:
+
+```bash
+npx responsive-dx init
+```
+
+*Detects your framework, installs `responsive-dx` as a devDependency, and automatically injects `<ResponsiveDX />` into your root layout.*
+
+---
+
+### 🛠️ Option B: Manual Setup
+
+#### 1. Install package
 
 ```bash
 # pnpm
@@ -71,20 +87,11 @@ yarn add -D responsive-dx
 bun add -d responsive-dx
 ```
 
----
+#### 2. Add to your Root Layout
 
-## 🚀 30-Second Quick Start
-
-### 1. Next.js App Router (`app/layout.tsx`)
-
+**Next.js App Router (`app/layout.tsx`)**
 ```tsx
-import type { Metadata } from 'next';
 import { ResponsiveDX } from 'responsive-dx';
-import './globals.css';
-
-export const metadata: Metadata = {
-  title: 'My App',
-};
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -98,12 +105,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 }
 ```
 
-### 2. Next.js Pages Router (`pages/_app.tsx`)
-
+**Next.js Pages Router (`pages/_app.tsx`)**
 ```tsx
 import type { AppProps } from 'next/app';
 import { ResponsiveDX } from 'responsive-dx';
-import '../styles/globals.css';
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
@@ -115,14 +120,12 @@ export default function App({ Component, pageProps }: AppProps) {
 }
 ```
 
-### 3. Vite + React (`src/main.tsx` / `src/App.tsx`)
-
+**Vite + React (`src/main.tsx` / `src/App.tsx`)**
 ```tsx
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { ResponsiveDX } from 'responsive-dx';
 import App from './App';
-import './index.css';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
@@ -130,6 +133,33 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <ResponsiveDX />
   </React.StrictMode>
 );
+```
+
+**Remix / React Router v7 (`app/root.tsx`)**
+```tsx
+import { ResponsiveDX } from 'responsive-dx';
+
+export default function Root() {
+  return (
+    <Document>
+      <Outlet />
+      <ResponsiveDX />
+    </Document>
+  );
+}
+```
+
+**Astro (`src/layouts/Layout.astro`)**
+```astro
+---
+import { ResponsiveDX } from 'responsive-dx';
+---
+<html lang="en">
+  <body>
+    <slot />
+    <ResponsiveDX client:only="react" />
+  </body>
+</html>
 ```
 
 ---
