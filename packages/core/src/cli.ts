@@ -291,6 +291,8 @@ export function runInit(options: { cwd?: string; dryRun?: boolean; yes?: boolean
   console.log();
 
   // 1. Install dependency if needed
+  let installSuccess = detection.isInstalled;
+
   if (!detection.isInstalled) {
     const installCommands: Record<PackageManager, string> = {
       pnpm: 'pnpm add -D responsive-dx',
@@ -305,19 +307,31 @@ export function runInit(options: { cwd?: string; dryRun?: boolean; yes?: boolean
       try {
         execSync(installCmd, { cwd, stdio: 'inherit' });
         console.log('\x1b[32m✓ Package installed successfully.\x1b[0m\n');
+        installSuccess = true;
       } catch (err) {
-        console.error('\x1b[31m✖ Failed to run package installation command automatically.\x1b[0m');
-        console.log(`  Please install manually: ${installCmd}\n`);
+        // Retry with --ignore-scripts if npm/pnpm fails on script policies
+        try {
+          const fallbackCmd = `${installCmd} --ignore-scripts`;
+          console.log(`\x1b[33m🔄 Retrying install with --ignore-scripts...\x1b[0m`);
+          execSync(fallbackCmd, { cwd, stdio: 'inherit' });
+          console.log('\x1b[32m✓ Package installed successfully with --ignore-scripts.\x1b[0m\n');
+          installSuccess = true;
+        } catch {
+          console.error('\x1b[31m✖ Failed to run package installation command automatically.\x1b[0m');
+          console.log(`  Please install manually: ${installCmd}\n`);
+          installSuccess = false;
+        }
       }
     } else {
       console.log(`  [dry-run] Would execute: ${installCmd}\n`);
+      installSuccess = true;
     }
   } else {
     console.log('\x1b[32m✓ responsive-dx is already installed.\x1b[0m\n');
   }
 
-  // 2. Inject code into target layout file
-  if (detection.targetFile) {
+  // 2. Inject code into target layout file (only if installed or user is in dry-run)
+  if (installSuccess && detection.targetFile) {
     const fullTarget = path.join(cwd, detection.targetFile);
     if (fs.existsSync(fullTarget)) {
       console.log(`\x1b[34m🛠️  Configuring ${detection.targetFile}...\x1b[0m`);
@@ -336,6 +350,10 @@ export function runInit(options: { cwd?: string; dryRun?: boolean; yes?: boolean
         console.log(`\x1b[33mℹ ${message}\x1b[0m\n`);
       }
     }
+  } else if (!installSuccess) {
+    console.log('\x1b[33m⚠ Skipped modifying layout files because package installation failed.\x1b[0m');
+    console.log('  Once you install `responsive-dx`, re-run `npx responsive-dx init` to complete setup.\n');
+    return;
   } else {
     console.log('\x1b[33m⚠ Could not automatically locate a root layout file.\x1b[0m');
     console.log('  Please add <ResponsiveDX /> to your root React layout manually:\n');
