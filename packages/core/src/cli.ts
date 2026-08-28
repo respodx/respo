@@ -274,32 +274,46 @@ export function injectCode(content: string, framework: FrameworkType): { updated
 }
 
 export function checkAndFixSecurityHeaders(cwd: string, dryRun = false): { checked: boolean; fixed: boolean; message?: string } {
+  // Check next.config files first (most common X-Frame-Options source), then middleware
   const candidateFiles = [
+    'next.config.ts',
+    'next.config.js',
+    'next.config.mjs',
     'src/middleware.ts',
     'middleware.ts',
     'src/middleware.js',
     'middleware.js',
-    'next.config.js',
-    'next.config.mjs',
-    'next.config.ts',
   ];
 
   for (const relPath of candidateFiles) {
     const fullPath = path.join(cwd, relPath);
-    if (fs.existsSync(fullPath)) {
-      const content = fs.readFileSync(fullPath, 'utf8');
-      const denyRegex = /(['"]X-Frame-Options['"]\s*[,:]\s*['"])DENY(['"])/gi;
-      if (denyRegex.test(content)) {
-        const updated = content.replace(denyRegex, '$1SAMEORIGIN$2');
-        if (!dryRun) {
-          fs.writeFileSync(fullPath, updated, 'utf8');
-        }
-        return {
-          checked: true,
-          fixed: true,
-          message: `Updated X-Frame-Options: DENY -> SAMEORIGIN in ${relPath} for localhost iframe compatibility.`,
-        };
+    if (!fs.existsSync(fullPath)) continue;
+
+    const content = fs.readFileSync(fullPath, 'utf8');
+    let updated = content;
+
+    // Pattern 1: middleware-style — "X-Frame-Options": "DENY"  or  'X-Frame-Options': 'DENY'
+    const middlewareRegex = /(['"]X-Frame-Options['"]\s*[,:]\s*['"])DENY(['"]\s*[,}]?)/gi;
+    updated = updated.replace(middlewareRegex, '$1SAMEORIGIN$2');
+
+    // Pattern 2: next.config headers() object style —
+    //   { key: "X-Frame-Options", value: "DENY" }
+    const configRegex = /(key\s*:\s*['"]X-Frame-Options['"][^}]*?value\s*:\s*['"])DENY(['"])/gi;
+    updated = updated.replace(configRegex, '$1SAMEORIGIN$2');
+
+    // Also handle reversed order: { value: "DENY", key: "X-Frame-Options" }
+    const configRegexReversed = /(value\s*:\s*['"])DENY(['"][^}]*?key\s*:\s*['"]X-Frame-Options['"])/gi;
+    updated = updated.replace(configRegexReversed, '$1SAMEORIGIN$2');
+
+    if (updated !== content) {
+      if (!dryRun) {
+        fs.writeFileSync(fullPath, updated, 'utf8');
       }
+      return {
+        checked: true,
+        fixed: true,
+        message: `Updated X-Frame-Options: DENY → SAMEORIGIN in ${relPath} for localhost iframe embedding.`,
+      };
     }
   }
 
@@ -413,13 +427,14 @@ export function main() {
 Usage: npx responsive-dx [command] [options]
 
 Commands:
-  init          Automatically install & configure responsive-dx in your project (default)
+  init            Automatically install & configure responsive-dx in your project (default)
+  fix-headers     Fix X-Frame-Options: DENY → SAMEORIGIN in next.config.ts / middleware.ts
 
 Options:
-  -h, --help    Show this help message
-  -v, --version Show version
-  -y, --yes     Automatic yes to prompts
-  --dry-run     Simulate actions without modifying files
+  -h, --help      Show this help message
+  -v, --version   Show version
+  -y, --yes       Automatic yes to prompts
+  --dry-run       Simulate actions without modifying files
     `);
     process.exit(0);
   }
@@ -437,8 +452,23 @@ Options:
   const dryRun = args.includes('--dry-run');
   const yes = args.includes('--yes') || args.includes('-y');
 
+  if (command === 'fix-headers') {
+    const cwd = process.cwd();
+    console.log('\n\x1b[34m🔍 Scanning for X-Frame-Options: DENY in config files...\x1b[0m');
+    const result = checkAndFixSecurityHeaders(cwd, dryRun);
+    if (result.fixed) {
+      console.log(`\x1b[32m✓ ${result.message}\x1b[0m`);
+      console.log('\x1b[1m\x1b[32m\nDone! Restart your dev server for the change to take effect.\x1b[0m\n');
+    } else {
+      console.log('\x1b[33mℹ No X-Frame-Options: DENY found in config files.\x1b[0m');
+      console.log('  If you are still seeing iframe blocking, your hosting provider may be adding this header.\n');
+    }
+    return;
+  }
+
   runInit({ dryRun, yes });
 }
+
 
 // Auto-run if executed directly as a script
 if (typeof process !== 'undefined' && process.argv && process.argv[1]) {

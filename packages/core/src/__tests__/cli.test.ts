@@ -160,4 +160,38 @@ describe('Environment and Framework Detection', () => {
       fs.rmSync(tmpDir, { recursive: true, force: true });
     }
   });
+
+  it('detects and fixes X-Frame-Options: DENY in next.config.ts object-style headers', () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'respo-test-nxtcfg-'));
+    try {
+      const configPath = path.join(tmpDir, 'next.config.ts');
+      fs.writeFileSync(
+        configPath,
+        `const nextConfig = {
+  async headers() {
+    return [
+      {
+        source: "/(.*)",
+        headers: [
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+        ],
+      },
+    ];
+  },
+};
+export default nextConfig;`
+      );
+
+      const check = checkAndFixSecurityHeaders(tmpDir, false);
+      expect(check.fixed).toBe(true);
+
+      const fixedContent = fs.readFileSync(configPath, 'utf8');
+      expect(fixedContent).toContain('value: "SAMEORIGIN"');
+      expect(fixedContent).not.toContain('value: "DENY"');
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
 });
+
