@@ -99,11 +99,26 @@ function findMatchingElement(
 }
 
 /**
+ * Safely reads window.location.href without throwing SecurityError on cross-origin frames.
+ */
+function getSafeLocationHref(win: Window | null | undefined): string {
+  if (!win) return '';
+  try {
+    const loc = win.location;
+    if (!loc) return '';
+    return typeof loc.href === 'string' ? loc.href : '';
+  } catch {
+    return '';
+  }
+}
+
+/**
  * Builds a target frame URL ensuring rdx_frame=1 is retained.
  */
 function buildFrameUrl(targetWin: Window, newUrl: string): string {
   try {
-    const parsed = new URL(newUrl, targetWin.location.href);
+    const baseHref = getSafeLocationHref(targetWin) || (typeof window !== 'undefined' ? window.location.href : 'http://localhost');
+    const parsed = new URL(newUrl, baseHref);
     parsed.searchParams.set('rdx_frame', '1');
     return parsed.href;
   } catch {
@@ -202,11 +217,17 @@ export function useEventMirror(
 
         for (const targetFrame of getOtherIframes(sourceFrame)) {
           const targetWin = targetFrame.contentWindow;
-          const targetDoc = targetFrame.contentDocument;
+          let targetDoc: Document | null = null;
+          try {
+            targetDoc = targetFrame.contentDocument;
+          } catch {
+            targetDoc = null;
+          }
           if (!targetWin) continue;
 
           try {
-            const currentTargetNormalized = getNormalizedPath(targetWin.location.href);
+            const currentHref = getSafeLocationHref(targetWin);
+            const currentTargetNormalized = getNormalizedPath(currentHref);
             if (currentTargetNormalized === targetNormalized) {
               lastKnownPaths.set(targetFrame, targetNormalized);
               continue;
@@ -218,7 +239,8 @@ export function useEventMirror(
             // 1. First, attempt to trigger Next.js / SPA client routing by clicking matching anchor in targetDoc
             if (targetDoc) {
               try {
-                const parsedTarget = new URL(newUrl, sourceWin.location.href);
+                const srcHref = getSafeLocationHref(sourceWin);
+                const parsedTarget = new URL(newUrl, srcHref || (typeof window !== 'undefined' ? window.location.href : 'http://localhost'));
                 const pathOnly = parsedTarget.pathname;
                 const matchLink = targetDoc.querySelector(
                   `a[href="${CSS.escape(newUrl)}"], a[href="${CSS.escape(targetNormalized)}"], a[href="${CSS.escape(pathOnly)}"]`
@@ -246,7 +268,7 @@ export function useEventMirror(
               try {
                 const winNow = targetFrame.contentWindow;
                 if (winNow) {
-                  const nowNormalized = getNormalizedPath(winNow.location.href);
+                  const nowNormalized = getNormalizedPath(getSafeLocationHref(winNow));
                   if (nowNormalized !== targetNormalized) {
                     winNow.location.assign(fullTargetUrl);
                   }
@@ -304,7 +326,12 @@ export function useEventMirror(
     function setupIframe(source: HTMLIFrameElement) {
       try {
         const win = source.contentWindow;
-        const doc = source.contentDocument;
+        let doc: Document | null = null;
+        try {
+          doc = source.contentDocument;
+        } catch {
+          return;
+        }
         if (!win || !doc || attachedDocs.has(doc)) return;
 
         // Mark this document as attached to prevent duplicate event listeners
@@ -313,14 +340,22 @@ export function useEventMirror(
         // Check if another active iframe is already scrolled, and sync initial position immediately
         const activeIframes = getActiveIframes();
         const masterFrame = activeIframes.find(
-          (f) => f !== source && ((f.contentWindow?.scrollY || 0) > 0 || (f.contentDocument?.documentElement?.scrollTop || 0) > 0)
+          (f) => {
+            try {
+              return f !== source && (((f.contentWindow as any)?.scrollY || 0) > 0 || (f.contentDocument?.documentElement?.scrollTop || 0) > 0);
+            } catch {
+              return false;
+            }
+          }
         );
         if (masterFrame && masterFrame.contentWindow) {
-          const sX = masterFrame.contentWindow.scrollX || masterFrame.contentDocument?.documentElement?.scrollLeft || 0;
-          const sY = masterFrame.contentWindow.scrollY || masterFrame.contentDocument?.documentElement?.scrollTop || 0;
-          if (sX > 0 || sY > 0) {
-            applyScrollToFrame(source, sX, sY);
-          }
+          try {
+            const sX = masterFrame.contentWindow.scrollX || masterFrame.contentDocument?.documentElement?.scrollLeft || 0;
+            const sY = masterFrame.contentWindow.scrollY || masterFrame.contentDocument?.documentElement?.scrollTop || 0;
+            if (sX > 0 || sY > 0) {
+              applyScrollToFrame(source, sX, sY);
+            }
+          } catch {}
         }
 
         // ─── 1. Scroll & Wheel Synchronization ──────────────────────
@@ -367,8 +402,9 @@ export function useEventMirror(
           const link = targetEl.closest('a');
           if (link && link.href) {
             try {
-              const linkUrl = new URL(link.href, win.location.href);
-              if (linkUrl.origin === win.location.origin) {
+              const srcHref = getSafeLocationHref(win);
+              const linkUrl = new URL(link.href, srcHref || (typeof window !== 'undefined' ? window.location.href : 'http://localhost'));
+              if (linkUrl.origin === (typeof window !== 'undefined' ? window.location.origin : '')) {
                 syncNavigation(win, source, link.href);
               }
             } catch {}
@@ -378,7 +414,12 @@ export function useEventMirror(
           lockInputMirror(100);
 
           for (const targetFrame of getOtherIframes(source)) {
-            const targetDoc = targetFrame.contentDocument;
+            let targetDoc: Document | null = null;
+            try {
+              targetDoc = targetFrame.contentDocument;
+            } catch {
+              continue;
+            }
             const targetWin = targetFrame.contentWindow;
             if (!targetDoc || !targetWin) continue;
 
@@ -434,7 +475,7 @@ export function useEventMirror(
           win.history.pushState = function (...args) {
             const result = originalPushState(...args);
             try {
-              const url = args[2] ? String(args[2]) : win.location.href;
+              const url = args[2] ? String(args[2]) : getSafeLocationHref(win);
               const normalized = getNormalizedPath(url);
               if (normalized && normalized !== lastActivePath.current) {
                 syncNavigation(win, source, url);
@@ -446,7 +487,7 @@ export function useEventMirror(
           win.history.replaceState = function (...args) {
             const result = originalReplaceState(...args);
             try {
-              const url = args[2] ? String(args[2]) : win.location.href;
+              const url = args[2] ? String(args[2]) : getSafeLocationHref(win);
               const normalized = getNormalizedPath(url);
               if (normalized && normalized !== lastActivePath.current) {
                 syncNavigation(win, source, url);
@@ -456,10 +497,10 @@ export function useEventMirror(
           };
 
           const handlePopState = () => {
-            syncNavigation(win, source, win.location.href);
+            syncNavigation(win, source, getSafeLocationHref(win));
           };
           const handleHashChange = () => {
-            syncNavigation(win, source, win.location.href);
+            syncNavigation(win, source, getSafeLocationHref(win));
           };
 
           win.addEventListener('popstate', handlePopState);
@@ -643,8 +684,10 @@ export function useEventMirror(
             setupIframe(iframe);
             const win = iframe.contentWindow;
             if (win) {
-              const currentPath = getNormalizedPath(win.location.href);
-              lastKnownPaths.set(iframe, currentPath);
+              const currentPath = getNormalizedPath(getSafeLocationHref(win));
+              if (currentPath && currentPath !== 'about:blank') {
+                lastKnownPaths.set(iframe, currentPath);
+              }
             }
           };
           iframe.addEventListener('load', handleIframeLoad);
@@ -654,7 +697,7 @@ export function useEventMirror(
         const win = iframe.contentWindow;
         if (win && !lastKnownPaths.has(iframe)) {
           try {
-            lastKnownPaths.set(iframe, getNormalizedPath(win.location.href));
+            lastKnownPaths.set(iframe, getNormalizedPath(getSafeLocationHref(win)));
           } catch {}
         }
       }
@@ -666,7 +709,8 @@ export function useEventMirror(
           if (!win) continue;
 
           try {
-            const currentPath = getNormalizedPath(win.location.href);
+            const currentHref = getSafeLocationHref(win);
+            const currentPath = getNormalizedPath(currentHref);
             if (!currentPath || currentPath === 'about:blank') continue;
 
             const prevPath = lastKnownPaths.get(iframe);
@@ -674,7 +718,7 @@ export function useEventMirror(
             if (prevPath && currentPath !== prevPath) {
               lastKnownPaths.set(iframe, currentPath);
               lastActivePath.current = currentPath;
-              syncNavigation(win, iframe, win.location.href);
+              syncNavigation(win, iframe, currentHref);
               break;
             } else {
               lastKnownPaths.set(iframe, currentPath);

@@ -31,8 +31,14 @@ export function ViewportFrame({
     const updateUrl = () => {
       try {
         const win = iframe.contentWindow;
-        if (win && win.location && win.location.href) {
-          const href = win.location.href;
+        if (!win) return;
+        let href: string | null = null;
+        try {
+          href = typeof win.location?.href === 'string' ? win.location.href : null;
+        } catch {
+          href = null;
+        }
+        if (href) {
           setCurrentUrl((prev) => (prev !== href ? href : prev));
         }
       } catch {}
