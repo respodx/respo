@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-08-28
+
+### Added
+- **1-Command Automated Setup CLI**: Added `npx responsive-dx init` (and alias `npx respo init`) to automatically detect project frameworks (Next.js App Router, Pages Router, Vite, Remix, Astro), install `responsive-dx`, and inject `<ResponsiveDX />` directly into root layout files.
+- **CLI Executable Binary**: Added `./bin/cli.js` with shebang for seamless cross-platform execution.
+- **Package Manager Auto-Detection**: Supports zero-friction installation across `pnpm`, `npm`, `yarn`, and `bun`.
+
 ## [0.2.0] - 2026-08-28
 
 ### Fixed

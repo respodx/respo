@@ -31,9 +31,11 @@ export default defineConfig([
     },
   },
   {
-    entry: ['src/cli.ts'],
+    entry: {
+      cli: 'src/cli.ts',
+    },
     format: ['cjs'],
-    outDir: 'bin',
+    outDir: 'dist',
     banner: {
       js: '#!/usr/bin/env node',
     },
