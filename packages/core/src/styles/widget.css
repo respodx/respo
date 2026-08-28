@@ -1049,3 +1049,15 @@
 .rdx-blocked-card__btn:hover {
   opacity: 0.9;
 }
+
+.rdx-blocked-card__btn--secondary {
+  background: #27272a;
+  color: #e4e4e7;
+  border: 1px solid #3f3f46;
+  margin-right: 8px;
+}
+
+.rdx-blocked-card__btn--secondary:hover {
+  background: #3f3f46;
+  color: #ffffff;
+}

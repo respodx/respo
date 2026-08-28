@@ -25,6 +25,7 @@ export function ViewportFrame({
   const [currentUrl, setCurrentUrl] = React.useState(src);
 
   const [isBlocked, setIsBlocked] = React.useState(false);
+  const [copied, setCopied] = React.useState(false);
 
   React.useEffect(() => {
     const iframe = (iframeRef as React.RefObject<HTMLIFrameElement>)?.current;
@@ -212,6 +213,18 @@ export function ViewportFrame({
                   <code>response.headers.set('X-Frame-Options', 'SAMEORIGIN')</code>
                 </div>
                 <div className="rdx-blocked-card__actions">
+                  <button
+                    className="rdx-blocked-card__btn rdx-blocked-card__btn--secondary"
+                    onClick={() => {
+                      if (typeof navigator !== 'undefined' && navigator.clipboard) {
+                        navigator.clipboard.writeText("response.headers.set('X-Frame-Options', 'SAMEORIGIN');");
+                        setCopied(true);
+                        setTimeout(() => setCopied(false), 2000);
+                      }
+                    }}
+                  >
+                    {copied ? '✓ Copied!' : '📋 Copy Fix'}
+                  </button>
                   <button
                     className="rdx-blocked-card__btn"
                     onClick={() => {

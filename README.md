@@ -220,6 +220,30 @@ import { ResponsiveDX } from 'responsive-dx';
 
 ---
 
+## 🛡️ Troubleshooting & Security Headers (Next.js)
+
+If your app uses strict custom headers (e.g. `X-Frame-Options: DENY`), browsers will block local `<iframe>` previews.
+
+### Automatic Fix (CLI)
+Running `npx responsive-dx init` will automatically detect and configure this for you.
+
+### Manual Fix
+In your `middleware.ts` or `next.config.js`, ensure `X-Frame-Options` is set to `SAMEORIGIN` during development:
+
+```ts
+// middleware.ts
+import { NextResponse } from 'next/server';
+
+export function middleware() {
+  const response = NextResponse.next();
+  // Allow localhost to embed iframes for responsive testing
+  response.headers.set('X-Frame-Options', 'SAMEORIGIN');
+  return response;
+}
+```
+
+---
+
 ## 🤝 Contributing
 
 Contributions, issues, and feature requests are welcome! Feel free to check out the [Issues](https://github.com) page.
