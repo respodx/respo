@@ -116,6 +116,7 @@ function buildFrameUrl(targetWin: Window, newUrl: string): string {
  */
 function getNormalizedPath(urlStr: string): string {
   try {
+    if (!urlStr || urlStr === 'about:blank' || urlStr.startsWith('javascript:')) return '';
     const parsed = new URL(urlStr, 'http://localhost');
     parsed.searchParams.delete('rdx_frame');
     return parsed.pathname + (parsed.search ? parsed.search : '') + parsed.hash;
@@ -156,7 +157,7 @@ export function useEventMirror(
     }
 
     let routeSyncTimer: any = null;
-    function lockRouteSync(durationMs = 350) {
+    function lockRouteSync(durationMs = 400) {
       isSyncingRoute.current = true;
       clearTimeout(routeSyncTimer);
       routeSyncTimer = setTimeout(() => {
@@ -185,17 +186,19 @@ export function useEventMirror(
 
     function syncNavigation(sourceWin: Window, sourceFrame: HTMLIFrameElement, newUrl: string) {
       try {
-        if (!newUrl) return;
+        if (!newUrl || newUrl === 'about:blank' || newUrl.startsWith('javascript:')) return;
         const targetNormalized = getNormalizedPath(newUrl);
         if (!targetNormalized) return;
 
-        lastActivePath.current = targetNormalized;
-        lockRouteSync(350);
-
-        // Pre-update lastKnownPaths for all frames so continuous polling doesn't trigger reverse sync
-        for (const f of getActiveIframes()) {
-          lastKnownPaths.set(f, targetNormalized);
+        if (lastActivePath.current === targetNormalized && isSyncingRoute.current) {
+          return;
         }
+
+        lastActivePath.current = targetNormalized;
+        lockRouteSync(400);
+
+        // Pre-update tracking for source frame
+        lastKnownPaths.set(sourceFrame, targetNormalized);
 
         for (const targetFrame of getOtherIframes(sourceFrame)) {
           const targetWin = targetFrame.contentWindow;
@@ -204,12 +207,15 @@ export function useEventMirror(
 
           try {
             const currentTargetNormalized = getNormalizedPath(targetWin.location.href);
-            if (currentTargetNormalized === targetNormalized) continue;
+            if (currentTargetNormalized === targetNormalized) {
+              lastKnownPaths.set(targetFrame, targetNormalized);
+              continue;
+            }
 
             const fullTargetUrl = buildFrameUrl(targetWin, newUrl);
+            lastKnownPaths.set(targetFrame, targetNormalized);
 
             // 1. First, attempt to trigger Next.js / SPA client routing by clicking matching anchor in targetDoc
-            let linkTriggered = false;
             if (targetDoc) {
               try {
                 const parsedTarget = new URL(newUrl, sourceWin.location.href);
@@ -218,21 +224,39 @@ export function useEventMirror(
                   `a[href="${CSS.escape(newUrl)}"], a[href="${CSS.escape(targetNormalized)}"], a[href="${CSS.escape(pathOnly)}"]`
                 ) as HTMLAnchorElement | null;
 
-                if (matchLink && typeof matchLink.click === 'function') {
-                  matchLink.click();
-                  linkTriggered = true;
+                if (matchLink) {
+                  const mouseEv = new ((targetWin as any).MouseEvent || MouseEvent)('click', {
+                    bubbles: true,
+                    cancelable: true,
+                    view: targetWin,
+                  });
+                  (mouseEv as any).__rdx_synthetic = true;
+                  matchLink.dispatchEvent(mouseEv);
+                  if (typeof matchLink.click === 'function') {
+                    try {
+                      matchLink.click();
+                    } catch {}
+                  }
                 }
               } catch {}
             }
 
-            // 2. Direct browser navigation if client link not found
-            if (!linkTriggered) {
+            // 2. Direct browser navigation fallback if client route didn't update after microtask
+            setTimeout(() => {
               try {
-                targetWin.location.href = fullTargetUrl;
+                const winNow = targetFrame.contentWindow;
+                if (winNow) {
+                  const nowNormalized = getNormalizedPath(winNow.location.href);
+                  if (nowNormalized !== targetNormalized) {
+                    winNow.location.assign(fullTargetUrl);
+                  }
+                }
               } catch {
-                targetFrame.src = fullTargetUrl;
+                try {
+                  targetFrame.src = fullTargetUrl;
+                } catch {}
               }
-            }
+            }, 80);
           } catch {}
         }
       } catch {}
@@ -346,7 +370,6 @@ export function useEventMirror(
               const linkUrl = new URL(link.href, win.location.href);
               if (linkUrl.origin === win.location.origin) {
                 syncNavigation(win, source, link.href);
-                return;
               }
             } catch {}
           }
@@ -410,29 +433,33 @@ export function useEventMirror(
 
           win.history.pushState = function (...args) {
             const result = originalPushState(...args);
-            if (!isSyncingRoute.current && args[2]) {
-              syncNavigation(win, source, String(args[2]));
-            }
+            try {
+              const url = args[2] ? String(args[2]) : win.location.href;
+              const normalized = getNormalizedPath(url);
+              if (normalized && normalized !== lastActivePath.current) {
+                syncNavigation(win, source, url);
+              }
+            } catch {}
             return result;
           };
 
           win.history.replaceState = function (...args) {
             const result = originalReplaceState(...args);
-            if (!isSyncingRoute.current && args[2]) {
-              syncNavigation(win, source, String(args[2]));
-            }
+            try {
+              const url = args[2] ? String(args[2]) : win.location.href;
+              const normalized = getNormalizedPath(url);
+              if (normalized && normalized !== lastActivePath.current) {
+                syncNavigation(win, source, url);
+              }
+            } catch {}
             return result;
           };
 
           const handlePopState = () => {
-            if (!isSyncingRoute.current) {
-              syncNavigation(win, source, win.location.href);
-            }
+            syncNavigation(win, source, win.location.href);
           };
           const handleHashChange = () => {
-            if (!isSyncingRoute.current) {
-              syncNavigation(win, source, win.location.href);
-            }
+            syncNavigation(win, source, win.location.href);
           };
 
           win.addEventListener('popstate', handlePopState);
@@ -640,9 +667,11 @@ export function useEventMirror(
 
           try {
             const currentPath = getNormalizedPath(win.location.href);
+            if (!currentPath || currentPath === 'about:blank') continue;
+
             const prevPath = lastKnownPaths.get(iframe);
 
-            if (prevPath && currentPath && currentPath !== prevPath) {
+            if (prevPath && currentPath !== prevPath) {
               lastKnownPaths.set(iframe, currentPath);
               lastActivePath.current = currentPath;
               syncNavigation(win, iframe, win.location.href);
