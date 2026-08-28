@@ -24,6 +24,8 @@ export function ViewportFrame({
 
   const [currentUrl, setCurrentUrl] = React.useState(src);
 
+  const [isBlocked, setIsBlocked] = React.useState(false);
+
   React.useEffect(() => {
     const iframe = (iframeRef as React.RefObject<HTMLIFrameElement>)?.current;
     if (!iframe) return;
@@ -40,15 +42,46 @@ export function ViewportFrame({
         }
         if (href) {
           setCurrentUrl((prev) => (prev !== href ? href : prev));
+          setIsBlocked(false);
         }
       } catch {}
     };
 
-    iframe.addEventListener('load', updateUrl);
-    const interval = setInterval(updateUrl, 250);
+    const handleLoad = () => {
+      updateUrl();
+      setTimeout(() => {
+        try {
+          const win = iframe.contentWindow;
+          if (!win || typeof win.location?.href !== 'string') {
+            setIsBlocked(true);
+          } else {
+            setIsBlocked(false);
+          }
+        } catch {
+          setIsBlocked(true);
+        }
+      }, 400);
+    };
+
+    iframe.addEventListener('load', handleLoad);
+    const interval = setInterval(updateUrl, 300);
+
+    // Fallback diagnostic check if load was blocked by server headers
+    const timer = setTimeout(() => {
+      try {
+        const win = iframe.contentWindow;
+        if (!win || typeof win.location?.href !== 'string') {
+          setIsBlocked(true);
+        }
+      } catch {
+        setIsBlocked(true);
+      }
+    }, 2500);
+
     return () => {
-      iframe.removeEventListener('load', updateUrl);
+      iframe.removeEventListener('load', handleLoad);
       clearInterval(interval);
+      clearTimeout(timer);
     };
   }, [iframeRef]);
 
@@ -146,7 +179,7 @@ export function ViewportFrame({
         {/* Iframe Viewport Container */}
         <div
           className="rdx-iframe-viewport"
-          style={{ width: scaledWidth, height: scaledHeight }}
+          style={{ width: scaledWidth, height: scaledHeight, position: 'relative' }}
         >
           <iframe
             ref={iframeRef as React.RefObject<HTMLIFrameElement>}
@@ -163,6 +196,36 @@ export function ViewportFrame({
             title={`${preset.label} preview`}
             loading="eager"
           />
+
+          {/* Diagnostic Overlay for server header blocks */}
+          {isBlocked && (
+            <div className="rdx-blocked-overlay">
+              <div className="rdx-blocked-card">
+                <div className="rdx-blocked-card__header">
+                  <span className="rdx-blocked-card__badge">FRAME BLOCKED BY SERVER</span>
+                </div>
+                <h4 className="rdx-blocked-card__title">X-Frame-Options: DENY</h4>
+                <p className="rdx-blocked-card__desc">
+                  Your Next.js middleware or server headers are blocking local iframe embedding.
+                </p>
+                <div className="rdx-blocked-card__code">
+                  <code>response.headers.set('X-Frame-Options', 'SAMEORIGIN')</code>
+                </div>
+                <div className="rdx-blocked-card__actions">
+                  <button
+                    className="rdx-blocked-card__btn"
+                    onClick={() => {
+                      const iframe = (iframeRef as React.RefObject<HTMLIFrameElement>)?.current;
+                      if (iframe) iframe.src = initialSrcRef.current;
+                      setIsBlocked(false);
+                    }}
+                  >
+                    Retry Connection
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

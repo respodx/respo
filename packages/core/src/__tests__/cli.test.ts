@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { injectCode, detectFrameworkAndLayout, detectPackageManager } from '../cli.js';
+import { injectCode, detectFrameworkAndLayout, detectPackageManager, checkAndFixSecurityHeaders } from '../cli.js';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
@@ -136,6 +136,26 @@ describe('Environment and Framework Detection', () => {
       const detection = detectFrameworkAndLayout(tmpDir);
       expect(detection.framework).toBe('next-app');
       expect(detection.targetFile).toBe('app/layout.tsx');
+    } finally {
+      fs.rmSync(tmpDir, { recursive: true, force: true });
+    }
+  });
+
+  it('detects and fixes X-Frame-Options: DENY in middleware.ts', () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'respo-test-sec-'));
+    try {
+      fs.mkdirSync(path.join(tmpDir, 'src'), { recursive: true });
+      const mwPath = path.join(tmpDir, 'src/middleware.ts');
+      fs.writeFileSync(
+        mwPath,
+        `import { NextResponse } from 'next/server';\nexport function middleware() {\n  const res = NextResponse.next();\n  res.headers.set('X-Frame-Options', 'DENY');\n  return res;\n}`
+      );
+
+      const check = checkAndFixSecurityHeaders(tmpDir, false);
+      expect(check.fixed).toBe(true);
+
+      const fixedContent = fs.readFileSync(mwPath, 'utf8');
+      expect(fixedContent).toContain("res.headers.set('X-Frame-Options', 'SAMEORIGIN')");
     } finally {
       fs.rmSync(tmpDir, { recursive: true, force: true });
     }

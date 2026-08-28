@@ -273,6 +273,39 @@ export function injectCode(content: string, framework: FrameworkType): { updated
   };
 }
 
+export function checkAndFixSecurityHeaders(cwd: string, dryRun = false): { checked: boolean; fixed: boolean; message?: string } {
+  const candidateFiles = [
+    'src/middleware.ts',
+    'middleware.ts',
+    'src/middleware.js',
+    'middleware.js',
+    'next.config.js',
+    'next.config.mjs',
+    'next.config.ts',
+  ];
+
+  for (const relPath of candidateFiles) {
+    const fullPath = path.join(cwd, relPath);
+    if (fs.existsSync(fullPath)) {
+      const content = fs.readFileSync(fullPath, 'utf8');
+      const denyRegex = /(['"]X-Frame-Options['"]\s*[,:]\s*['"])DENY(['"])/gi;
+      if (denyRegex.test(content)) {
+        const updated = content.replace(denyRegex, '$1SAMEORIGIN$2');
+        if (!dryRun) {
+          fs.writeFileSync(fullPath, updated, 'utf8');
+        }
+        return {
+          checked: true,
+          fixed: true,
+          message: `Updated X-Frame-Options: DENY -> SAMEORIGIN in ${relPath} for localhost iframe compatibility.`,
+        };
+      }
+    }
+  }
+
+  return { checked: true, fixed: false };
+}
+
 export function runInit(options: { cwd?: string; dryRun?: boolean; yes?: boolean } = {}) {
   const cwd = options.cwd || process.cwd();
   const dryRun = options.dryRun || false;
@@ -330,7 +363,13 @@ export function runInit(options: { cwd?: string; dryRun?: boolean; yes?: boolean
     console.log('\x1b[32m✓ responsive-dx is already installed.\x1b[0m\n');
   }
 
-  // 2. Inject code into target layout file (only if installed or user is in dry-run)
+  // 2. Check and fix restrictive security headers (X-Frame-Options: DENY)
+  const headerCheck = checkAndFixSecurityHeaders(cwd, dryRun);
+  if (headerCheck.fixed && headerCheck.message) {
+    console.log(`\x1b[32m✓ ${headerCheck.message}\x1b[0m\n`);
+  }
+
+  // 3. Inject code into target layout file (only if installed or user is in dry-run)
   if (installSuccess && detection.targetFile) {
     const fullTarget = path.join(cwd, detection.targetFile);
     if (fs.existsSync(fullTarget)) {
