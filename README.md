@@ -1,63 +1,48 @@
-<div align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./assets/logo-dark.svg">
-    <img src="./assets/logo-dark.svg" alt="Respo DX" width="96" height="96" />
-  </picture>
+# Respo DX
 
-  <h1>RESPO . DX</h1>
-  <p><strong>Zero-config in-browser responsive workbench suite for localhost.</strong></p>
-  <p>Simultaneously test mobile, tablet, and desktop layouts with direct DOM event mirroring, live theme sync, and hardware chassis.</p>
+Zero-config in-browser responsive workbench suite for localhost. Test mobile, tablet, and desktop layouts simultaneously with direct DOM event mirroring, live theme synchronization, and isolated hardware bezels.
 
-  <p>
-    <a href="https://www.npmjs.com/package/responsive-dx"><img src="https://img.shields.io/npm/v/responsive-dx.svg?style=flat-square&color=000000&label=npm" alt="npm version" /></a>
-    <a href="https://www.npmjs.com/package/responsive-dx"><img src="https://img.shields.io/badge/dependencies-0-success?style=flat-square" alt="0 Dependencies" /></a>
-    <a href="https://bundlephobia.com/package/responsive-dx"><img src="https://img.shields.io/bundlephobia/minzip/responsive-dx?style=flat-square&color=000000&label=bundle%20size" alt="bundle size" /></a>
-    <a href="https://github.com/facebook/react"><img src="https://img.shields.io/badge/React-18%20%7C%2019-black.svg?style=flat-square" alt="React 18/19" /></a>
-    <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-Ready-blue?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript" /></a>
-    <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-black.svg?style=flat-square" alt="License" /></a>
-  </p>
-
-  <br />
-
-  <img src="./assets/demo.gif" alt="Respo DX Multi-Viewport Responsive Preview Demo" width="100%" style="border-radius: 6px; box-shadow: 0 12px 32px rgba(0,0,0,0.4);" />
-</div>
+[![npm version](https://img.shields.io/npm/v/responsive-dx.svg?style=flat-square)](https://www.npmjs.com/package/responsive-dx)
+[![license](https://img.shields.io/badge/license-MIT-black.svg?style=flat-square)](LICENSE)
 
 <br />
 
+<img src="./assets/demo.gif" alt="Respo DX Multi-Viewport Responsive Preview Demo" width="100%" style="border-radius: 6px; box-shadow: 0 12px 32px rgba(0,0,0,0.4);" />
+
 ---
 
-## ⚡ Why Not Chrome DevTools?
+## Overview
 
-Every web developer uses Chrome DevTools, but testing responsive UX has remained painfully repetitive:
+Respo DX provides an in-browser multi-viewport testing environment directly inside your local development server.
 
-| Feature | Chrome DevTools | Respo (`responsive-dx`) |
+| Feature | Chrome DevTools | Respo DX |
 | :--- | :--- | :--- |
-| **Multi-Device View** | ❌ 1 viewport at a time | ✅ **Mobile, Tablet & Desktop side-by-side** |
-| **Scroll Sync** | ❌ None | ✅ **Zero-latency DOM scroll mirroring across all frames** |
-| **Click & Navigation Sync**| ❌ None | ✅ **Click links, buttons, and menus in sync** |
-| **Form Input Mirroring** | ❌ Retype on every screen | ✅ **Type inputs, toggles, & selects in real time** |
-| **Dark / Light Theme Sync**| ❌ Manual toggle per tab | ✅ **Reactive auto-sync with system & in-app themes** |
-| **Single-View Focus** | ❌ Rescale entire window | ✅ **Instant 1-click zoom (`[ ⛶ FOCUS ]`) + Esc to reset** |
-| **Dependencies & Bloat** | ⚠️ Complex emulators | ✅ **0 Dependencies, 0 Security Warnings** |
-| **Team DX Standardization** | ❌ Every dev configures own emulators | ✅ **Standardized via your repo's `devDependencies`** |
-| **Hardware Bezels** | ⚠️ Flat gray box | ✅ **Realistic iPhone notch & macOS chassis** |
+| **Multi-Device View** | Single viewport | Mobile, Tablet, and Desktop side-by-side |
+| **Scroll Sync** | Not supported | Zero-latency DOM scroll mirroring |
+| **Click & Navigation Sync** | Not supported | Synchronized link clicks and navigation |
+| **Form Input Mirroring** | Not supported | Real-time input, textarea, and select mirroring |
+| **Theme Sync** | Manual toggle per tab | Automatic sync with system and class/data theme changes |
+| **Single-View Focus** | Rescales entire window | One-click focus mode (`Esc` to exit) |
+| **Runtime Dependencies** | None | 0 external runtime dependencies |
+| **Team Standardization** | Manual emulator presets | Configured via project `devDependencies` |
+| **Hardware Bezels** | Basic frame | Device frames with notch and macOS header |
 
 ---
 
-## ✨ Features
+## Features
 
-- 🛡️ **Zero Runtime Dependencies**: Has **0 external sub-dependencies**, zero install scripts, and zero security vulnerabilities. Ultra-lightweight and installs in under 1 second.
-- 🚀 **Direct DOM Event Mirroring**: Real-time scroll, click, and form input synchronization without browser extension overhead, proxy servers, or `postMessage` lag.
-- 🌓 **Dynamic Theme Synchronization**: Seamlessly detects `prefers-color-scheme`, `data-theme`, and Tailwind `class="dark"` mutations on `document.documentElement` and mirrors them across all viewports.
-- 🔍 **Single-View Zoom & Center**: Hit `[ ⛶ FOCUS ]` on any viewport to immediately center and zoom that device to 100% full view with ambient depth blur on background frames. Press `Escape` to return to multi-view.
-- 🛡️ **Shadow DOM Isolation**: All studio styles, top command dock, and chassis elements adopt CSS directly inside an isolated Shadow Root — **zero style leakage or CSS clashes** with your host application.
-- 🌲 **Zero Production Footprint**: Evaluates to `null` when `process.env.NODE_ENV !== 'development'`. Modern bundlers (Webpack, Vite, Turbopack, Rollup) automatically tree-shake the entire package out of production builds.
+- **Zero Runtime Dependencies**: No external sub-dependencies, install scripts, or security bloat.
+- **Direct DOM Event Mirroring**: Real-time scroll, click, and form input synchronization without proxy servers or `postMessage` serialization overhead.
+- **Dynamic Theme Synchronization**: Observes `prefers-color-scheme`, `data-theme`, and class-based theme switches on `document.documentElement` to mirror styles across frames.
+- **Single-View Focus Mode**: Focus any viewport to inspect it at 100% scale. Press `Escape` to return to multi-view.
+- **Shadow DOM Isolation**: UI, controls, and frame chassis render inside an isolated Shadow Root to prevent CSS conflicts with host applications.
+- **Zero Production Footprint**: Evaluates to `null` outside development environments (`process.env.NODE_ENV !== 'development'`) and is completely removed during production bundling.
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
-### ⚡ Option A: 1-Command Automated Setup (Recommended)
+### Automated Setup
 
 Run inside any React, Next.js, Vite, Remix, or Astro project:
 
@@ -65,13 +50,13 @@ Run inside any React, Next.js, Vite, Remix, or Astro project:
 npx responsive-dx init
 ```
 
-*Detects your framework, installs `responsive-dx` as a devDependency, and automatically injects `<ResponsiveDX />` into your root layout.*
+The CLI detects your framework, installs `responsive-dx` as a devDependency, and injects `<ResponsiveDX />` into your root layout.
 
 ---
 
-### 🛠️ Option B: Manual Setup
+### Manual Setup
 
-#### 1. Install package
+#### 1. Install Package
 
 ```bash
 # pnpm
@@ -87,7 +72,7 @@ yarn add -D responsive-dx
 bun add -d responsive-dx
 ```
 
-#### 2. Add to your Root Layout
+#### 2. Add to Root Layout
 
 **Next.js App Router (`app/layout.tsx`)**
 ```tsx
@@ -164,7 +149,7 @@ import { ResponsiveDX } from 'responsive-dx';
 
 ---
 
-## ⚙️ Props & Configuration
+## Configuration
 
 | Prop | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
@@ -180,55 +165,55 @@ import { ResponsiveDX } from 'responsive-dx';
 
 ---
 
-## 📐 Built-in Viewport Presets
+## Built-in Viewports
 
 | Preset ID | Device Type | Logical Resolution | Description |
 | :--- | :--- | :--- | :--- |
-| `mobile-375` | Mobile | 375 × 812 px | Modern mobile layout (iPhone-grade viewport) |
-| `tablet-768` | Tablet | 768 × 1024 px | Portrait tablet layout (iPad-grade viewport) |
-| `desktop-1440` | Desktop | 1440 × 900 px | Standard wide desktop layout with Mac header |
+| `mobile-375` | Mobile | 375 × 812 px | Mobile phone layout |
+| `tablet-768` | Tablet | 768 × 1024 px | Tablet layout |
+| `desktop-1440` | Desktop | 1440 × 900 px | Desktop layout |
 
 ---
 
-## 🧠 Architecture & How It Works
+## Architecture
 
 ```
                      ┌──────────────────────────────────────────────┐
                      │            Host Application (DOM)           │
                      └──────────────────────┬───────────────────────┘
                                             │
-                                  <ResponsiveDX />
+                                   <ResponsiveDX />
                                             │
-                               ┌────────────▼────────────┐
-                               │  Shadow DOM Root       │
-                               │  (Complete Isolation)  │
-                               └────────────┬────────────┘
-                                            │
-               ┌────────────────────────────┼────────────────────────────┐
-               │                            │                            │
-      ┌────────▼────────┐          ┌────────▼────────┐          ┌────────▼────────┐
-      │  Mobile Frame   │ ◄──────► │  Tablet Frame   │ ◄──────► │ Desktop Frame   │
-      │   (375 × 812)   │  Mutual  │  (768 × 1024)   │  Mutual  │  (1440 × 900)   │
-      └─────────────────┘  Excl.   └─────────────────┘  Excl.   └─────────────────┘
-                ▲                    Event Mutex                  ▲
-                └────────────────── Live DOM Mirror ──────────────┘
+                                ┌────────────▼────────────┐
+                                │  Shadow DOM Root       │
+                                │  (Complete Isolation)  │
+                                └────────────┬────────────┘
+                                             │
+                ┌────────────────────────────┼────────────────────────────┐
+                │                            │                            │
+       ┌────────▼────────┐          ┌────────▼────────┐          ┌────────▼────────┐
+       │  Mobile Frame   │ ◄──────► │  Tablet Frame   │ ◄──────► │ Desktop Frame   │
+       │   (375 × 812)   │  Mutual  │  (768 × 1024)   │  Mutual  │  (1440 × 900)   │
+       └─────────────────┘  Excl.   └─────────────────┘  Excl.   └─────────────────┘
+                 ▲                    Event Mutex                  ▲
+                 └────────────────── Live DOM Mirror ──────────────┘
 ```
 
-1. **Same-Origin Direct DOM Access**: Because all viewport iframes point to `localhost`, Respo accesses `contentWindow.document` directly without `postMessage` serializing overhead.
-2. **Mutual Exclusion Event Mutex**: When scrolling or typing in one viewport, an internal mutex lock temporarily prevents child-to-parent-to-child event feedback loops.
-3. **Browsing Context Recursion Guard**: An internal SSR and iframe guard (`isTopFrame()`) guarantees that nested iframes inside the studio never recursively mount instances of the widget.
+1. **Same-Origin Direct DOM Access**: Because all viewport iframes point to `localhost`, Respo DX accesses `contentWindow.document` directly without `postMessage` serialization overhead.
+2. **Mutual Exclusion Event Mutex**: Internal lock management prevents child-to-parent-to-child event feedback loops during interaction sync.
+3. **Browsing Context Guard**: SSR and frame detection ensure nested child iframes do not mount duplicate instances.
 
 ---
 
-## 🛡️ Troubleshooting & Security Headers (Next.js)
+## Security Headers (Next.js)
 
-If your app uses strict custom headers (e.g. `X-Frame-Options: DENY`), browsers will block local `<iframe>` previews.
+If your project specifies strict security headers (e.g. `X-Frame-Options: DENY`), browsers will block `<iframe>` rendering.
 
-### Automatic Fix (CLI)
-Running `npx responsive-dx init` will automatically detect and configure this for you.
+### Automatic Configuration
+Running `npx responsive-dx init` configures compatible headers automatically.
 
-### Manual Fix
-In your `middleware.ts` or `next.config.js`, ensure `X-Frame-Options` is set to `SAMEORIGIN` during development:
+### Manual Configuration
+Set `X-Frame-Options` to `SAMEORIGIN` in development middleware or next config:
 
 ```ts
 // middleware.ts
@@ -236,7 +221,6 @@ import { NextResponse } from 'next/server';
 
 export function middleware() {
   const response = NextResponse.next();
-  // Allow localhost to embed iframes for responsive testing
   response.headers.set('X-Frame-Options', 'SAMEORIGIN');
   return response;
 }
@@ -244,18 +228,18 @@ export function middleware() {
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
-Contributions, issues, and feature requests are welcome! Feel free to check out the [Issues](https://github.com) page.
+Contributions and issues are welcome. Check out the [Issues](https://github.com/respodx/respo/issues) page to get started.
 
-1. Fork the project
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'feat: add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/name`)
+3. Commit your changes (`git commit -m 'feat: add feature'`)
+4. Push to the branch (`git push origin feature/name`)
 5. Open a Pull Request
 
 ---
 
-## 📄 License
+## License
 
 Distributed under the MIT License. See [LICENSE](LICENSE) for details.
