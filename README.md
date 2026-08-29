@@ -149,6 +149,28 @@ import { ResponsiveDX } from 'responsive-dx';
 
 ---
 
+## Demo App
+
+An interactive Next.js example is included in the monorepo under [`apps/demo`](apps/demo).
+
+To run the demo locally:
+
+```bash
+# Clone the repository
+git clone https://github.com/respodx/respo.git
+cd respo
+
+# Install dependencies
+pnpm install
+
+# Start the demo development server
+pnpm --filter demo dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) to test the responsive multi-viewport suite with live DOM mirroring and theme switching.
+
+---
+
 ## Configuration
 
 | Prop | Type | Default | Description |
