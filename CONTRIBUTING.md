@@ -1,17 +1,17 @@
-# Contributing to Respo (`responsive-dx`)
+# Contributing to Respo DX
 
-Thank you for your interest in contributing to **Respo**! We welcome contributions, bug fixes, and feature proposals.
+Thank you for your interest in contributing to **Respo DX**. We welcome contributions, bug fixes, and feature proposals.
 
 ---
 
-## 🛠️ Development Setup
+## Development Setup
 
 This project uses a **pnpm + Turborepo** monorepo setup:
 
 ```bash
-# 1. Clone the repository
-git clone https://github.com/<your-username>/responsive-dx.git
-cd responsive-dx
+# 1. Fork the repo and clone your fork
+git clone https://github.com/<your-username>/respo.git
+cd respo
 
 # 2. Install dependencies
 pnpm install
@@ -20,22 +20,22 @@ pnpm install
 pnpm dev
 
 # 4. Run tests
-pnpm -F responsive-dx test
+pnpm --filter responsive-dx test
 ```
 
 ---
 
-## 🧪 Testing Guidelines
+## Testing Guidelines
 
 - Unit tests are located under `packages/core/src/__tests__/`.
-- Run `pnpm -F responsive-dx test` to execute Vitest tests.
-- Ensure all tests pass and `tsc --noEmit` reports 0 errors before opening a pull request.
+- Run `pnpm --filter responsive-dx test` to execute Vitest tests.
+- Ensure all tests pass and `pnpm --filter responsive-dx lint` reports 0 errors before opening a pull request.
 
 ---
 
-## 📜 Pull Request Process
+## Pull Request Process
 
-1. Fork the repo and create your branch from `main`.
+1. Fork the repository and create your feature branch from `main` (e.g. `git checkout -b feat/my-feature` or `git checkout -b fix/issue-description`).
 2. Ensure consistent code formatting and clean commit messages.
-3. If adding a new feature, include relevant unit tests.
-4. Open a Pull Request with a clear description of the changes and motivation.
+3. If adding a new feature or fixing a bug, include relevant unit tests.
+4. Push to your fork and open a Pull Request against `main` with a clear description of the changes and motivation.
