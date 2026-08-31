@@ -358,7 +358,7 @@
   font-weight: 700;
 }
 
-/* Actions: Tour & Close */
+/* Actions: Theme, Tour & Close */
 .rdx-dock__actions {
   display: flex;
   align-items: center;
@@ -366,6 +366,7 @@
   padding-left: 4px;
 }
 
+.rdx-dock-theme-btn,
 .rdx-dock-help-btn,
 .rdx-dock-close-btn {
   width: 30px;
@@ -381,6 +382,7 @@
   transition: all var(--rdx-transition);
 }
 
+.rdx-dock-theme-btn:hover,
 .rdx-dock-help-btn:hover,
 .rdx-dock-close-btn:hover {
   color: var(--rdx-text);
@@ -389,6 +391,7 @@
   transform: scale(1.05);
 }
 
+.rdx-dock-theme-btn:active,
 .rdx-dock-help-btn:active,
 .rdx-dock-close-btn:active {
   transform: scale(0.95);

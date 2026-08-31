@@ -1,7 +1,18 @@
 import React from 'react';
 import type { ControlBarProps } from '../types/index.js';
 import { VIEWPORT_PRESETS } from '../constants/viewports.js';
-import { DeviceIcon, CloseIcon, ZoomOutIcon, RespoLogoIcon, HelpIcon, MinusIcon, PlusIcon, FitScreenIcon } from './Icons.js';
+import {
+  DeviceIcon,
+  CloseIcon,
+  ZoomOutIcon,
+  RespoLogoIcon,
+  HelpIcon,
+  MinusIcon,
+  PlusIcon,
+  FitScreenIcon,
+  SunIcon,
+  MoonIcon,
+} from './Icons.js';
 
 export function ControlBar({
   activeViewportIds,
@@ -15,8 +26,9 @@ export function ControlBar({
   onZoomIn,
   onZoomOut,
   onZoomFit,
+  theme = 'dark',
+  onToggleTheme,
 }: ControlBarProps) {
-
   return (
     <div className="rdx-dock" role="toolbar" aria-label="Respo DX Command Dock">
       {/* Animated container edge beam */}
@@ -102,15 +114,24 @@ export function ControlBar({
         </div>
       )}
 
-      {/* Actions: Tour & Close */}
-
+      {/* Actions: Theme, Tour & Close */}
       <div className="rdx-dock__actions">
+        {onToggleTheme && (
+          <button
+            className="rdx-dock-theme-btn"
+            onClick={onToggleTheme}
+            aria-label={theme === 'dark' ? 'Switch to light canvas theme' : 'Switch to dark canvas theme'}
+            title={theme === 'dark' ? 'Canvas Theme: Dark (Click for Light)' : 'Canvas Theme: Light (Click for Dark)'}
+          >
+            {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
+          </button>
+        )}
         {onStartTour && (
           <button
             className="rdx-dock-help-btn"
             onClick={onStartTour}
             aria-label="Open quick tour"
-            title="Quick Tour"
+            title="Quick Tour (?)"
           >
             <HelpIcon />
           </button>
@@ -127,3 +148,4 @@ export function ControlBar({
     </div>
   );
 }
+

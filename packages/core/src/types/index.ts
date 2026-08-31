@@ -33,6 +33,8 @@ export interface ControlBarProps {
   onZoomIn?: (() => void) | undefined;
   onZoomOut?: (() => void) | undefined;
   onZoomFit?: (() => void) | undefined;
+  theme?: 'dark' | 'light' | undefined;
+  onToggleTheme?: (() => void) | undefined;
 }
 
 export interface ViewportGridProps {

@@ -29,52 +29,35 @@ function DevWidgetInner({ src: srcProp, defaultViewports = DEFAULT_ACTIVE_VIEWPO
   const [showTour, setShowTour] = useState(false);
   const [activeIds, setActiveIds] = useState<string[]>(defaultViewports);
   const [focusedId, setFocusedId] = useState<string | null>(null);
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
-  const [zoomMultiplier, setZoomMultiplier] = useState(1.0);
-  const [isAutoFit, setIsAutoFit] = useState(true);
-  const panelRef = useRef<HTMLDivElement | null>(null);
-  const shadowRoot = useShadowMount(widgetCss);
-
-
-  // Auto theme detection (system preference + document class/attribute)
-  useEffect(() => {
-    function detectTheme() {
-      const isExplicitDark =
-        document.documentElement.classList.contains('dark') ||
-        document.documentElement.getAttribute('data-theme') === 'dark';
-      const isExplicitLight =
-        document.documentElement.classList.contains('light') ||
-        document.documentElement.getAttribute('data-theme') === 'light';
-
-      if (isExplicitDark) {
-        setTheme('dark');
-      } else if (isExplicitLight) {
-        setTheme('light');
-      } else {
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        setTheme(prefersDark ? 'dark' : 'light');
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('respo_theme');
+        if (saved === 'dark' || saved === 'light') return saved;
+      } catch {
+        // ignore
       }
     }
+    return 'dark';
+  });
 
-    detectTheme();
-
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleMediaChange = () => detectTheme();
-    mediaQuery.addEventListener('change', handleMediaChange);
-
-    const observer = new MutationObserver(detectTheme);
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['class', 'data-theme'],
+  const handleToggleTheme = () => {
+    setTheme((prev) => {
+      const next = prev === 'dark' ? 'light' : 'dark';
+      try {
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('respo_theme', next);
+        }
+      } catch {
+        // ignore
+      }
+      return next;
     });
-
-    return () => {
-      mediaQuery.removeEventListener('change', handleMediaChange);
-      observer.disconnect();
-    };
-  }, []);
+  };
 
   const handleOpenStudio = () => {
+    setIsAutoFit(true);
+    setZoomMultiplier(1.0);
     setIsOpen(true);
   };
 
@@ -213,6 +196,8 @@ function DevWidgetInner({ src: srcProp, defaultViewports = DEFAULT_ACTIVE_VIEWPO
             onZoomIn={handleZoomIn}
             onZoomOut={handleZoomOut}
             onZoomFit={handleZoomFit}
+            theme={theme}
+            onToggleTheme={handleToggleTheme}
           />
           <ViewportGrid
             activePresets={activePresets}
