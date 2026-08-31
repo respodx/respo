@@ -13,8 +13,19 @@
     background-image: radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px);
     background-size: 24px 24px;
     -webkit-font-smoothing: antialiased;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  body::-webkit-scrollbar,
+  html::-webkit-scrollbar,
+  *::-webkit-scrollbar {
+    display: none !important;
+    width: 0px !important;
+    height: 0px !important;
   }
 }
+
 
 .font-mono {
   font-family: var(--font-mono);

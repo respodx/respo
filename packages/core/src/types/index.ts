@@ -28,6 +28,11 @@ export interface ControlBarProps {
   focusedId?: string | null | undefined;
   onResetFocus?: (() => void) | undefined;
   onStartTour?: (() => void) | undefined;
+  zoomLevel?: number | undefined;
+  isAutoFit?: boolean | undefined;
+  onZoomIn?: (() => void) | undefined;
+  onZoomOut?: (() => void) | undefined;
+  onZoomFit?: (() => void) | undefined;
 }
 
 export interface ViewportGridProps {
@@ -36,7 +41,11 @@ export interface ViewportGridProps {
   iframeRefs: React.RefObject<HTMLIFrameElement | null>[];
   focusedId?: string | null | undefined;
   onToggleFocus?: ((id: string) => void) | undefined;
+  zoomMultiplier?: number | undefined;
+  isAutoFit?: boolean | undefined;
+  onAutoFitChange?: ((isFit: boolean) => void) | undefined;
 }
+
 
 export interface DevWidgetProps {
   /** Override the URL loaded in iframes. Defaults to window.location.href. */

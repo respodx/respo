@@ -332,12 +332,33 @@ export function useEventMirror(
         } catch {
           return;
         }
-        if (!win || !doc || attachedDocs.has(doc)) return;
-
         // Mark this document as attached to prevent duplicate event listeners
         attachedDocs.add(doc);
 
+        // Strip default browser scrollbars inside iframe document
+        try {
+          const styleId = '__respo_hide_scrollbar';
+          if (!doc.getElementById(styleId)) {
+            const style = doc.createElement('style');
+            style.id = styleId;
+            style.textContent = `
+              html, body, :root, * {
+                scrollbar-width: none !important;
+                -ms-overflow-style: none !important;
+              }
+              ::-webkit-scrollbar {
+                display: none !important;
+                width: 0px !important;
+                height: 0px !important;
+                background: transparent !important;
+              }
+            `;
+            (doc.head || doc.documentElement).appendChild(style);
+          }
+        } catch {}
+
         // Check if another active iframe is already scrolled, and sync initial position immediately
+
         const activeIframes = getActiveIframes();
         const masterFrame = activeIframes.find(
           (f) => {

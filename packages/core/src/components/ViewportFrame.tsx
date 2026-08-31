@@ -23,15 +23,54 @@ export function ViewportFrame({
   const initialSrcRef = React.useRef(frameSrc);
 
   const [currentUrl, setCurrentUrl] = React.useState(src);
-
   const [isBlocked, setIsBlocked] = React.useState(false);
   const [copied, setCopied] = React.useState(false);
+
+  // Helper to remove default browser scrollbar edges from within iframe document
+  const injectHideScrollbar = React.useCallback(() => {
+    const iframe = (iframeRef as React.RefObject<HTMLIFrameElement>)?.current;
+    if (!iframe) return;
+    try {
+      const doc = iframe.contentDocument || iframe.contentWindow?.document;
+      if (!doc) return;
+      const styleId = '__respo_hide_scrollbar';
+      if (!doc.getElementById(styleId)) {
+        const style = doc.createElement('style');
+        style.id = styleId;
+        style.textContent = `
+          /* Remove browser default scrollbars inside Respo DX preview iframes */
+          html, body, :root, * {
+            scrollbar-width: none !important;
+            -ms-overflow-style: none !important;
+          }
+          ::-webkit-scrollbar {
+            display: none !important;
+            width: 0px !important;
+            height: 0px !important;
+            max-width: 0px !important;
+            max-height: 0px !important;
+            background: transparent !important;
+          }
+          ::-webkit-scrollbar-track,
+          ::-webkit-scrollbar-thumb,
+          ::-webkit-scrollbar-corner {
+            display: none !important;
+            background: transparent !important;
+          }
+        `;
+        (doc.head || doc.documentElement).appendChild(style);
+      }
+    } catch {}
+  }, [iframeRef]);
 
   React.useEffect(() => {
     const iframe = (iframeRef as React.RefObject<HTMLIFrameElement>)?.current;
     if (!iframe) return;
 
+    injectHideScrollbar();
+
     const updateUrl = () => {
+      injectHideScrollbar();
       try {
         const win = iframe.contentWindow;
         if (!win) return;
@@ -49,8 +88,10 @@ export function ViewportFrame({
     };
 
     const handleLoad = () => {
+      injectHideScrollbar();
       updateUrl();
       setTimeout(() => {
+        injectHideScrollbar();
         try {
           const win = iframe.contentWindow;
           if (!win || typeof win.location?.href !== 'string') {
@@ -65,7 +106,8 @@ export function ViewportFrame({
     };
 
     iframe.addEventListener('load', handleLoad);
-    const interval = setInterval(updateUrl, 300);
+    const interval = setInterval(updateUrl, 250);
+
 
     // Fallback diagnostic check if load was blocked by server headers
     const timer = setTimeout(() => {

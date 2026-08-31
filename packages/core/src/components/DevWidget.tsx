@@ -30,8 +30,11 @@ function DevWidgetInner({ src: srcProp, defaultViewports = DEFAULT_ACTIVE_VIEWPO
   const [activeIds, setActiveIds] = useState<string[]>(defaultViewports);
   const [focusedId, setFocusedId] = useState<string | null>(null);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const [zoomMultiplier, setZoomMultiplier] = useState(1.0);
+  const [isAutoFit, setIsAutoFit] = useState(true);
   const panelRef = useRef<HTMLDivElement | null>(null);
   const shadowRoot = useShadowMount(widgetCss);
+
 
   // Auto theme detection (system preference + document class/attribute)
   useEffect(() => {
@@ -90,7 +93,27 @@ function DevWidgetInner({ src: srcProp, defaultViewports = DEFAULT_ACTIVE_VIEWPO
     setShowTour(true);
   };
 
-  // Handle Escape and ? keys
+  const handleZoomIn = () => {
+    setIsAutoFit(false);
+    setZoomMultiplier((prev) => Math.min(2.0, Math.round((prev + 0.15) * 100) / 100));
+  };
+
+  const handleZoomOut = () => {
+    setIsAutoFit(false);
+    setZoomMultiplier((prev) => Math.max(0.3, Math.round((prev - 0.15) * 100) / 100));
+  };
+
+  const handleZoomFit = () => {
+    if (isAutoFit) {
+      setIsAutoFit(false);
+      setZoomMultiplier(1.0);
+    } else {
+      setIsAutoFit(true);
+      setZoomMultiplier(1.0);
+    }
+  };
+
+  // Handle Escape, ?, and Zoom Hotkeys
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (!isOpen) return;
@@ -108,11 +131,20 @@ function DevWidgetInner({ src: srcProp, defaultViewports = DEFAULT_ACTIVE_VIEWPO
         }
       } else if (e.key === '?' && !isTyping) {
         setShowTour((prev) => !prev);
+      } else if ((e.ctrlKey || e.metaKey) && (e.key === '=' || e.key === '+')) {
+        e.preventDefault();
+        handleZoomIn();
+      } else if ((e.ctrlKey || e.metaKey) && (e.key === '-' || e.key === '_')) {
+        e.preventDefault();
+        handleZoomOut();
+      } else if ((e.ctrlKey || e.metaKey) && e.key === '0') {
+        e.preventDefault();
+        handleZoomFit();
       }
     }
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, focusedId, showTour]);
+  }, [isOpen, focusedId, showTour, isAutoFit]);
 
   // Create stable refs matching the number of presets
   const ref0 = useRef<HTMLIFrameElement | null>(null);
@@ -176,6 +208,11 @@ function DevWidgetInner({ src: srcProp, defaultViewports = DEFAULT_ACTIVE_VIEWPO
             focusedId={focusedId}
             onResetFocus={() => setFocusedId(null)}
             onStartTour={handleStartTour}
+            zoomLevel={zoomMultiplier}
+            isAutoFit={isAutoFit}
+            onZoomIn={handleZoomIn}
+            onZoomOut={handleZoomOut}
+            onZoomFit={handleZoomFit}
           />
           <ViewportGrid
             activePresets={activePresets}
@@ -183,6 +220,8 @@ function DevWidgetInner({ src: srcProp, defaultViewports = DEFAULT_ACTIVE_VIEWPO
             iframeRefs={iframeRefs}
             focusedId={focusedId}
             onToggleFocus={handleToggleFocus}
+            zoomMultiplier={zoomMultiplier}
+            isAutoFit={isAutoFit}
           />
           {showTour && (
             <OnboardingTour
@@ -196,3 +235,4 @@ function DevWidgetInner({ src: srcProp, defaultViewports = DEFAULT_ACTIVE_VIEWPO
     shadowRoot
   );
 }
+

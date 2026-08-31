@@ -1,7 +1,7 @@
 import React from 'react';
 import type { ControlBarProps } from '../types/index.js';
 import { VIEWPORT_PRESETS } from '../constants/viewports.js';
-import { DeviceIcon, CloseIcon, ZoomOutIcon, RespoLogoIcon, HelpIcon } from './Icons.js';
+import { DeviceIcon, CloseIcon, ZoomOutIcon, RespoLogoIcon, HelpIcon, MinusIcon, PlusIcon, FitScreenIcon } from './Icons.js';
 
 export function ControlBar({
   activeViewportIds,
@@ -10,7 +10,13 @@ export function ControlBar({
   focusedId,
   onResetFocus,
   onStartTour,
+  zoomLevel,
+  isAutoFit,
+  onZoomIn,
+  onZoomOut,
+  onZoomFit,
 }: ControlBarProps) {
+
   return (
     <div className="rdx-dock" role="toolbar" aria-label="Respo DX Command Dock">
       {/* Animated container edge beam */}
@@ -59,7 +65,45 @@ export function ControlBar({
         </button>
       )}
 
+      {/* Canvas Zoom & Fit Controller */}
+      {onZoomIn && onZoomOut && onZoomFit && (
+        <div className="rdx-dock__zoom" role="group" aria-label="Canvas Zoom Controls">
+          <button
+            className="rdx-dock-zoom-btn"
+            onClick={onZoomOut}
+            title="Zoom Out (Ctrl + Scroll Down)"
+            aria-label="Zoom Out"
+          >
+            <MinusIcon />
+          </button>
+          <button
+            className={`rdx-dock-zoom-val${isAutoFit ? ' rdx-dock-zoom-val--fit' : ''}`}
+            onClick={onZoomFit}
+            title={isAutoFit ? 'Auto-Fit Active (Click for 100%)' : 'Fit All to Screen (Click for Auto-Fit)'}
+            aria-label={isAutoFit ? 'Auto-Fit Active' : 'Fit All to Screen'}
+          >
+            {isAutoFit ? (
+              <>
+                <FitScreenIcon />
+                <span>FIT</span>
+              </>
+            ) : (
+              <span>{Math.round((zoomLevel ?? 1) * 100)}%</span>
+            )}
+          </button>
+          <button
+            className="rdx-dock-zoom-btn"
+            onClick={onZoomIn}
+            title="Zoom In (Ctrl + Scroll Up)"
+            aria-label="Zoom In"
+          >
+            <PlusIcon />
+          </button>
+        </div>
+      )}
+
       {/* Actions: Tour & Close */}
+
       <div className="rdx-dock__actions">
         {onStartTour && (
           <button

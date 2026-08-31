@@ -301,6 +301,63 @@
   border-color: var(--rdx-border-hover);
 }
 
+/* Dock Zoom Controller */
+.rdx-dock__zoom {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--rdx-border);
+  background: var(--rdx-surface);
+  border-radius: 0px;
+  overflow: hidden;
+}
+
+.rdx-dock-zoom-btn {
+  width: 26px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--rdx-surface);
+  border: none;
+  color: var(--rdx-text-muted);
+  cursor: pointer;
+  transition: all var(--rdx-transition);
+}
+
+.rdx-dock-zoom-btn:hover {
+  background: var(--rdx-btn-hover-bg);
+  color: var(--rdx-text);
+}
+
+.rdx-dock-zoom-val {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 8px;
+  height: 28px;
+  background: var(--rdx-surface);
+  border: none;
+  border-left: 1px solid var(--rdx-border);
+  border-right: 1px solid var(--rdx-border);
+  color: var(--rdx-text-muted);
+  font-family: var(--rdx-font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: all var(--rdx-transition);
+}
+
+.rdx-dock-zoom-val:hover {
+  background: var(--rdx-btn-hover-bg);
+  color: var(--rdx-text);
+}
+
+.rdx-dock-zoom-val--fit {
+  color: var(--rdx-text);
+  font-weight: 700;
+}
+
 /* Actions: Tour & Close */
 .rdx-dock__actions {
   display: flex;
@@ -345,35 +402,39 @@
   overflow-x: auto;
   overflow-y: auto;
   display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  padding: 85px 48px 60px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 76px 20px 30px;
   box-sizing: border-box;
   transition: background-color var(--rdx-transition);
+  cursor: grab;
+  position: relative;
+  /* Completely hide default OS scrollbar across browsers */
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.rdx-workbench::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.rdx-workbench--panning {
+  cursor: grabbing !important;
+  user-select: none !important;
+}
+
+.rdx-workbench--panning iframe {
+  pointer-events: none !important;
 }
 
 .rdx-workbench--focused {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-}
-
-.rdx-workbench::-webkit-scrollbar {
-  height: 8px;
-  width: 8px;
-}
-
-.rdx-workbench::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.rdx-workbench::-webkit-scrollbar-thumb {
-  background: var(--rdx-border);
-  border-radius: 0px;
-}
-
-.rdx-workbench::-webkit-scrollbar-thumb:hover {
-  background: var(--rdx-text-subtle);
+  cursor: default;
 }
 
 /* ─── Stage (Multi-View vs Centered Focus) ─────────────────────── */
@@ -381,8 +442,11 @@
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  gap: 40px;
-  min-width: min-content;
+  gap: 28px;
+  margin: auto;
+  min-width: max-content;
+  min-height: max-content;
+  padding: 0 20px;
   transition: all 400ms cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
 }
@@ -392,9 +456,87 @@
   align-items: center;
   justify-content: center;
   width: 100%;
-  height: calc(100vh - 120px);
+  height: 100%;
   gap: 0px;
+  padding: 0;
+  margin: auto;
 }
+
+
+/* ─── Custom Themed Scroll Indicator Overlay ───────────────── */
+.rdx-scroll-indicator-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 999990;
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+
+.rdx-scroll-indicator-layer--constant,
+.rdx-scroll-indicator-layer--active {
+  opacity: 1 !important;
+}
+
+.rdx-scroll-track {
+  position: absolute;
+  background: var(--rdx-surface-card);
+  border: 1px solid var(--rdx-border);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  border-radius: 9999px;
+  pointer-events: auto;
+  cursor: pointer;
+  transition: border-color var(--rdx-transition), box-shadow var(--rdx-transition);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  overflow: hidden;
+}
+
+.rdx-scroll-track--x {
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 6px;
+}
+
+.rdx-scroll-track--y {
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+}
+
+.rdx-scroll-track:hover {
+  border-color: var(--rdx-border-hover);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 12px var(--rdx-dot);
+}
+
+.rdx-scroll-thumb {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: var(--rdx-text-subtle);
+  border-radius: 9999px;
+  cursor: grab;
+  transition: background var(--rdx-transition);
+}
+
+.rdx-scroll-thumb--x {
+  height: 100%;
+}
+
+.rdx-scroll-thumb--y {
+  width: 100%;
+}
+
+.rdx-scroll-thumb:hover,
+.rdx-scroll-thumb--dragging {
+  background: var(--rdx-text);
+  cursor: grabbing;
+  box-shadow: 0 0 8px var(--rdx-beam-color);
+}
+
+
 
 /* ─── Frame Slots ─────────────────────────────────────────────── */
 .rdx-frame-slot {
@@ -631,7 +773,16 @@
   display: block;
   border: none;
   background: var(--rdx-surface);
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
 }
+
+.rdx-iframe-viewport iframe::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
 
 /* ─── Empty State ────────────────────────────────────────────── */
 .rdx-empty {

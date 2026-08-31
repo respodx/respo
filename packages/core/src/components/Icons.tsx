@@ -110,8 +110,37 @@ export function GridIcon({ className = '' }: { className?: string }) {
   return <RespoLogoIcon className={className} size={20} />;
 }
 
+export function PlusIcon({ className = '' }: { className?: string }) {
+  return (
+    <svg className={className} width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 5v14" />
+      <path d="M5 12h14" />
+    </svg>
+  );
+}
+
+export function MinusIcon({ className = '' }: { className?: string }) {
+  return (
+    <svg className={className} width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M5 12h14" />
+    </svg>
+  );
+}
+
+export function FitScreenIcon({ className = '' }: { className?: string }) {
+  return (
+    <svg className={className} width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M8 3H5a2 2 0 0 0-2 2v3" />
+      <path d="M21 8V5a2 2 0 0 0-2-2h-3" />
+      <path d="M3 16v3a2 2 0 0 0 2 2h3" />
+      <path d="M16 21h3a2 2 0 0 0 2-2v-3" />
+    </svg>
+  );
+}
+
 export function DeviceIcon({ device, className = '' }: { device: 'mobile' | 'tablet' | 'desktop'; className?: string }) {
   if (device === 'mobile') return <SmartphoneIcon className={className} />;
   if (device === 'tablet') return <TabletIcon className={className} />;
   return <MonitorIcon className={className} />;
 }
+

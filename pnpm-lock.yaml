@@ -4,10 +4,6 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-overrides:
-  '@next/swc-win32-x64-msvc': file:./swc.tgz
-  next: file:./next.tgz
-
 importers:
 
   .:
@@ -21,12 +17,9 @@ importers:
 
   apps/demo:
     dependencies:
-      '@next/swc-win32-x64-msvc':
-        specifier: file:../../swc.tgz
-        version: file:swc.tgz
       next:
-        specifier: file:../../next.tgz
-        version: file:next.tgz(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: ^15.1.0
+        version: 15.1.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react:
         specifier: ^18.3.0
         version: 18.3.1
@@ -58,6 +51,9 @@ importers:
 
   packages/core:
     devDependencies:
+      '@types/node':
+        specifier: ^20.14.0
+        version: 20.19.43
       '@types/react':
         specifier: ^18.3.0
         version: 18.3.31
@@ -576,9 +572,8 @@ packages:
     cpu: [arm64]
     os: [win32]
 
-  '@next/swc-win32-x64-msvc@file:swc.tgz':
-    resolution: {integrity: sha512-J1YdKuJv9xcixzXR24Dv+4SaDKc2jj31IVUEMdO5xJivMTXuE6MAdIi4qPjSymHuFG8O5wbfWKnhJUcHHpj5CA==, tarball: file:swc.tgz}
-    version: 15.1.0
+  '@next/swc-win32-x64-msvc@15.1.0':
+    resolution: {integrity: sha512-J1YdKuJv9xcixzXR24Dv+4SaDKc2jj31IVUEMdO5xJivMTXuE6MAdIi4qPjSymHuFG8O5wbfWKnhJUcHHpj5CA==}
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [win32]
@@ -1183,10 +1178,10 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
-  next@file:next.tgz:
-    resolution: {integrity: sha512-QKhzt6Y8rgLNlj30izdMbxAwjHMFANnLwDwZ+WQh5sMhyt4lEBqDK9QpvWHtIM4rINKPoJ8aiRZKg5ULSybVHw==, tarball: file:next.tgz}
-    version: 15.1.0
+  next@15.1.0:
+    resolution: {integrity: sha512-QKhzt6Y8rgLNlj30izdMbxAwjHMFANnLwDwZ+WQh5sMhyt4lEBqDK9QpvWHtIM4rINKPoJ8aiRZKg5ULSybVHw==}
     engines: {node: ^18.18.0 || ^19.8.0 || >= 20.0.0}
+    deprecated: This version has a security vulnerability. Please upgrade to a patched version. See https://nextjs.org/blog/CVE-2025-66478 for more details.
     hasBin: true
     peerDependencies:
       '@opentelemetry/api': ^1.1.0
@@ -1815,7 +1810,8 @@ snapshots:
   '@next/swc-win32-arm64-msvc@15.1.0':
     optional: true
 
-  '@next/swc-win32-x64-msvc@file:swc.tgz': {}
+  '@next/swc-win32-x64-msvc@15.1.0':
+    optional: true
 
   '@rollup/rollup-android-arm-eabi@4.62.5':
     optional: true
@@ -2329,7 +2325,7 @@ snapshots:
 
   nanoid@3.3.18: {}
 
-  next@file:next.tgz(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  next@15.1.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       '@next/env': 15.1.0
       '@swc/counter': 0.1.3
@@ -2348,7 +2344,7 @@ snapshots:
       '@next/swc-linux-x64-gnu': 15.1.0
       '@next/swc-linux-x64-musl': 15.1.0
       '@next/swc-win32-arm64-msvc': 15.1.0
-      '@next/swc-win32-x64-msvc': file:swc.tgz
+      '@next/swc-win32-x64-msvc': 15.1.0
       sharp: 0.33.5
     transitivePeerDependencies:
       - '@babel/core'
