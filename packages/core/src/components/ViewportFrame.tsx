@@ -1,6 +1,7 @@
 import React from 'react';
 import type { ViewportFrameProps } from '../types/index.js';
-import { DeviceIcon, LockIcon, ZoomInIcon, ZoomOutIcon } from './Icons.js';
+import { DeviceIcon, LockIcon, ZoomInIcon, ZoomOutIcon, CameraIcon } from './Icons.js';
+import { useScreenshot } from '../hooks/useScreenshot.js';
 
 export function ViewportFrame({
   preset,
@@ -11,6 +12,9 @@ export function ViewportFrame({
   isBlurred,
   onToggleFocus,
 }: ViewportFrameProps) {
+  const { captureAndDownload } = useScreenshot();
+  const wrapperRef = React.useRef<HTMLDivElement>(null);
+  const viewportRef = React.useRef<HTMLDivElement>(null);
   const scaledWidth = Math.round(preset.width * scale);
   const scaledHeight = Math.round(preset.height * scale);
 
@@ -148,18 +152,31 @@ export function ViewportFrame({
 
   return (
     <div
+      ref={wrapperRef}
       className={`rdx-frame-wrapper${isFocused ? ' rdx-frame-wrapper--focused' : ''}${isBlurred ? ' rdx-frame-wrapper--blurred' : ''}`}
     >
       {/* Minimal clean header strip above frame */}
       <div className="rdx-frame-header" style={{ width: scaledWidth }}>
         <div className="rdx-frame-header__left">
           <DeviceIcon device={preset.device} className="rdx-frame-header__icon" />
-          <span className="rdx-frame-header__name">{preset.device.toUpperCase()}</span>
           <span className="rdx-frame-header__dim">{preset.width}px</span>
         </div>
 
         {/* Zoom & Focus Button */}
         <div className="rdx-frame-header__right">
+          <button
+            className="rdx-frame-zoom-btn"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (viewportRef.current) {
+                captureAndDownload(viewportRef.current, `respo-${preset.device}-screenshot`);
+              }
+            }}
+            title={`Screenshot ${preset.label}`}
+            aria-label={`Screenshot ${preset.label}`}
+          >
+            <CameraIcon />
+          </button>
           {onToggleFocus && (
             <button
               className={`rdx-frame-zoom-btn${isFocused ? ' rdx-frame-zoom-btn--active' : ''}`}
@@ -221,6 +238,7 @@ export function ViewportFrame({
 
         {/* Iframe Viewport Container */}
         <div
+          ref={viewportRef}
           className="rdx-iframe-viewport"
           style={{ width: scaledWidth, height: scaledHeight, position: 'relative' }}
         >

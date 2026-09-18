@@ -12,7 +12,9 @@ import {
   FitScreenIcon,
   SunIcon,
   MoonIcon,
+  CameraIcon,
 } from './Icons.js';
+import { useScreenshot } from '../hooks/useScreenshot.js';
 
 export function ControlBar({
   activeViewportIds,
@@ -29,6 +31,7 @@ export function ControlBar({
   theme = 'dark',
   onToggleTheme,
 }: ControlBarProps) {
+  const { captureAndDownload } = useScreenshot();
   return (
     <div className="rdx-dock" role="toolbar" aria-label="Respo DX Command Dock">
       {/* Animated container edge beam */}
@@ -136,6 +139,19 @@ export function ControlBar({
             <HelpIcon />
           </button>
         )}
+        <button
+          className="rdx-dock-help-btn"
+          onClick={(e) => {
+            const stage = (e.currentTarget.getRootNode() as ShadowRoot).querySelector('.rdx-stage') as HTMLElement;
+            if (stage) {
+              captureAndDownload(stage, 'respo-all-devices');
+            }
+          }}
+          aria-label="Screenshot all devices"
+          title="Screenshot All"
+        >
+          <CameraIcon />
+        </button>
         <button
           className="rdx-dock-close-btn"
           onClick={onClose}

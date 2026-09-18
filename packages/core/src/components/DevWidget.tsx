@@ -41,6 +41,11 @@ function DevWidgetInner({ src: srcProp, defaultViewports = DEFAULT_ACTIVE_VIEWPO
     return 'dark';
   });
 
+  const shadowRoot = useShadowMount(widgetCss);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const [isAutoFit, setIsAutoFit] = useState(true);
+  const [zoomMultiplier, setZoomMultiplier] = useState(1.0);
+
   const handleToggleTheme = () => {
     setTheme((prev) => {
       const next = prev === 'dark' ? 'light' : 'dark';
